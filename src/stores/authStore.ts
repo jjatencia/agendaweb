@@ -23,6 +23,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
         // Store session in localStorage
         localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, response.token);
+        localStorage.setItem('exora_token', response.token);
         localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(normalizedUser));
 
         set({
@@ -45,6 +46,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   logout: () => {
     AuthService.logout();
     localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+    localStorage.removeItem('exora_token');
     localStorage.removeItem(STORAGE_KEYS.USER_DATA);
 
     set({
@@ -57,7 +59,13 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   checkAuth: () => {
-    const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+    const storedToken = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+    const legacyToken = localStorage.getItem('exora_token');
+    const token = storedToken || legacyToken;
+
+    if (!storedToken && legacyToken) {
+      localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, legacyToken);
+    }
     const userData = localStorage.getItem(STORAGE_KEYS.USER_DATA);
     
     if (token && userData) {
