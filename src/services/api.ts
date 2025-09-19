@@ -1,6 +1,40 @@
-import axios from 'axios';
+import axios, { AxiosHeaders } from 'axios';
 import { API_BASE_URL, STORAGE_KEYS } from '../utils/constants';
 import { Appointment } from '../types';
+
+const normalizeToken = (token: string) => {
+  const trimmed = token.trim();
+  const hasBearerPrefix = /^Bearer\s+/i.test(trimmed);
+
+  if (!trimmed) {
+    return { rawToken: '', bearerToken: '' };
+  }
+
+  const rawToken = hasBearerPrefix ? trimmed.replace(/^Bearer\s+/i, '') : trimmed;
+  const bearerToken = hasBearerPrefix ? trimmed : `Bearer ${trimmed}`;
+
+  return { rawToken, bearerToken };
+};
+
+export const buildAuthHeaders = (token: string | null): Record<string, string> => {
+  if (!token) {
+    return {};
+  }
+
+  const { rawToken, bearerToken } = normalizeToken(token);
+
+  const headers: Record<string, string> = {};
+
+  if (rawToken) {
+    headers['x-token'] = rawToken;
+  }
+
+  if (bearerToken) {
+    headers.Authorization = bearerToken;
+  }
+
+  return headers;
+};
 
 // Create axios instance
 export const apiClient = axios.create({
@@ -14,10 +48,21 @@ export const apiClient = axios.create({
 // Request interceptor to add auth token
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
-    if (token) {
-      config.headers['x-token'] = token;
+    const storedToken =
+      localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN) ||
+      localStorage.getItem('exora_token');
+
+    const authHeaders = buildAuthHeaders(storedToken);
+
+    if (Object.keys(authHeaders).length > 0) {
+      const headers = AxiosHeaders.from(config.headers ?? {});
+      Object.entries(authHeaders).forEach(([key, value]) => {
+        headers.set(key, value);
+      });
+
+      config.headers = headers;
     }
+
     return config;
   },
   (error) => {

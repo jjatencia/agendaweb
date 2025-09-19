@@ -103,17 +103,22 @@ export class AuthService {
   static setToken(token: string): void {
     if (typeof window === 'undefined') return;
     localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token);
+    localStorage.setItem('exora_token', token);
   }
 
   static getToken(): string | null {
     if (typeof window === 'undefined') return null;
-    return localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+    return (
+      localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN) ||
+      localStorage.getItem('exora_token')
+    );
   }
 
   static removeToken(): void {
     if (typeof window === 'undefined') return;
     localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
     localStorage.removeItem(STORAGE_KEYS.USER_DATA);
+    localStorage.removeItem('exora_token');
   }
 
   static isAuthenticated(): boolean {

@@ -1,5 +1,5 @@
 import { Appointment } from '../types';
-import { apiClient } from './api';
+import { apiClient, buildAuthHeaders } from './api';
 import { AuthService } from './authService';
 
 export interface VentaData {
@@ -33,52 +33,47 @@ export const createVenta = async (appointment: Appointment, metodoPago: string):
     throw new Error('No hay token de autenticación');
   }
 
-  // Preparar los datos como los espera la API (sin estructura envuelta)
-  const ventaData: any = {
-    usuario: {
-      _id: appointment.usuario._id,
-      nombre: appointment.usuario.nombre,
-      email: appointment.usuario.email
-    },
-    empresa: {
-      _id: appointment.empresa,
-      nombre: "LBJ" // TODO: obtener nombre real de la empresa
-    },
-    sucursal: {
-      _id: appointment.sucursal._id,
-      nombre: appointment.sucursal.nombre
-    },
-    profesional: {
-      _id: appointment.profesional._id,
-      nombre: appointment.profesional.nombre
-    },
+  const ventaData: VentaData = {
+    usuario: appointment.usuario._id,
+    empresa: appointment.empresa,
+    sucursal: appointment.sucursal._id,
+    profesional: appointment.profesional._id,
     fechaCita: appointment.fecha,
     importe: appointment.importe,
-    promocion: appointment.promocion.map((promocionId: string) => ({
-      _id: promocionId,
-      titulo: "Aleatorio o Barbero Junior" // TODO: mapear títulos reales
-    })),
-    servicios: appointment.servicios.map(servicio => ({
+    promocion: Array.isArray(appointment.promocion)
+      ? appointment.promocion.map((promo: any) => {
+          if (typeof promo === 'string') {
+            return promo;
+          }
+          if (promo && typeof promo === 'object' && '_id' in promo) {
+            return promo._id;
+          }
+          return promo;
+        })
+      : [],
+    servicios: appointment.servicios.map((servicio) => ({
       _id: servicio._id,
       nombre: servicio.nombre,
       precio: servicio.precio
     })),
-    variantes: appointment.variantes.map(variante => ({
+    variantes: appointment.variantes.map((variante) => ({
       _id: variante._id,
       nombre: variante.nombre
     })),
     productos: [],
-    metodoPago: metodoPago,
+    metodoPago,
     cita: appointment._id,
-    descuentos: appointment.descuentos,
-    fechaVenta: new Date().toISOString(),
-    creacion: new Date().toISOString(),
-    modificacion: new Date().toISOString()
+    descuentos: Array.isArray(appointment.descuentos) ? appointment.descuentos : [],
+    fechaVenta: new Date().toISOString()
   };
+
   try {
+    const authHeaders = buildAuthHeaders(token);
+
     const response = await apiClient.post('/ventas', ventaData, {
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        ...authHeaders
       }
     });
 
