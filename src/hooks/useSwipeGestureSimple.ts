@@ -12,7 +12,8 @@ interface UseSwipeGestureProps {
 
 // Animation constants
 const SWIPE_THRESHOLD = 60;
-const VERTICAL_SWIPE_THRESHOLD = 60;
+const VERTICAL_SWIPE_THRESHOLD = 45;
+const VERTICAL_VELOCITY_THRESHOLD = 0.4;
 const ANIMATION_DELAY = 150;
 const DRAG_RESISTANCE = 0.8;
 const VERTICAL_RESISTANCE = 0.3;
@@ -64,8 +65,13 @@ export const useSwipeGestureSimple = ({
     }, ANIMATION_DELAY);
   };
 
-  const handleVerticalSwipe = (my: number) => {
-    if (Math.abs(my) > VERTICAL_SWIPE_THRESHOLD && my > 0 && onSwipeDown) {
+  const handleVerticalSwipe = (my: number, vy: number, directionY: number) => {
+    const isMovingDown = directionY > 0 || my > 0;
+
+    const hasEnoughDistance = Math.abs(my) > VERTICAL_SWIPE_THRESHOLD;
+    const hasEnoughVelocity = Math.abs(vy) > VERTICAL_VELOCITY_THRESHOLD;
+
+    if (isMovingDown && onSwipeDown && (hasEnoughDistance || hasEnoughVelocity)) {
       onSwipeDown();
     }
     resetToCenter();
@@ -83,13 +89,22 @@ export const useSwipeGestureSimple = ({
     });
   };
 
-  const bind = useDrag(({ down, movement: [mx, my] }) => {
+  const bind = useDrag(({ down, movement: [mx, my], velocity: [, vy], direction: [, dy] }) => {
     if (disabled) return;
 
     if (!down) {
-      const shouldSwipe = Math.abs(mx) > SWIPE_THRESHOLD;
+      const absX = Math.abs(mx);
+      const absY = Math.abs(my);
 
-      if (shouldSwipe) {
+      const isVerticalPreference =
+        absY > absX && (absY > VERTICAL_SWIPE_THRESHOLD || Math.abs(vy) > VERTICAL_VELOCITY_THRESHOLD);
+
+      if (isVerticalPreference) {
+        handleVerticalSwipe(my, vy, dy);
+        return;
+      }
+
+      if (absX > SWIPE_THRESHOLD) {
         const isLeftSwipe = mx < 0;
 
         if (isAtEdge(isLeftSwipe)) {
@@ -98,9 +113,10 @@ export const useSwipeGestureSimple = ({
         }
 
         executeSwipeAnimation(isLeftSwipe);
-      } else {
-        handleVerticalSwipe(my);
+        return;
       }
+
+      handleVerticalSwipe(my, vy, dy);
     } else {
       handleDragFeedback(mx, my);
     }
