@@ -107,11 +107,11 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
         boxShadow: isDisabled ? '0 2px 8px rgba(0, 0, 0, 0.04)' : '0 4px 15px rgba(0, 0, 0, 0.08)',
         cursor: isDisabled ? 'default' : 'pointer',
         zIndex: isActive ? 20 : 10,
-        width: '90%',
-        maxWidth: '380px',
-        height: '80%', // Reducir más la altura para pantallas pequeñas
-        maxHeight: '420px', // Altura máxima reducida
-        minHeight: '280px', // Altura mínima más pequeña para consola móvil
+        width: '100%',
+        maxWidth: '460px',
+        height: '100%', // Ocupa todo el alto disponible del contenedor
+        maxHeight: '560px', // Permite una tarjeta más alta sin tapar la navegación inferior
+        minHeight: '360px', // Garantiza presencia visual en pantallas más pequeñas
         margin: '0 auto',
         position: 'relative',
         opacity: isDisabled ? 0.6 : 1,
@@ -202,14 +202,14 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
               <div className="text-base font-medium">Promociones:</div>
               {appointment.promocion.length > 0 ? (
                 <div className={`text-sm mt-1 ${isDisabled ? 'text-gray-400' : 'text-gray-600'}`}>
-              {promotionLabels.map(({ key, label }) => (
-                <span
-                  key={key}
-                  className="bg-green-50 text-green-700 px-2 py-1 rounded-md inline-block mr-1 mb-1"
-                >
-                  {label}
-                </span>
-              ))}
+                  {promotionLabels.map(({ key, label }) => (
+                    <span
+                      key={key}
+                      className="bg-green-50 text-green-700 px-2 py-1 rounded-md inline-block mr-1 mb-1"
+                    >
+                      {label}
+                    </span>
+                  ))}
                 </div>
               ) : (
                 <div className="text-sm text-gray-600 mt-1">No</div>

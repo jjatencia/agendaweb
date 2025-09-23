@@ -17,17 +17,18 @@ interface CardStackProps {
 
 // Style constants - Hacer las tarjetas más grandes y mejor distribuidas
 const CONTAINER_STYLE = {
-  // Usar más espacio para las tarjetas pero dejar espacio para botón inferior
+  // Usar casi todo el alto disponible evitando solaparse con la navegación inferior
   flex: '1',
   display: 'flex',
   flexDirection: 'column' as const,
   justifyContent: 'center' as const,
   alignItems: 'center' as const,
-  padding: '1rem',
-  paddingBottom: '140px', // Más espacio para el botón inferior
-  // Altura ajustada para móviles pequeños y cuando se abre consola
-  maxHeight: 'calc(100vh - 240px)', // Más espacio restado para header y botón
-  minHeight: '300px' // Altura mínima más pequeña para pantallas muy pequeñas
+  padding: '1.25rem 1rem',
+  paddingBottom: '90px', // Espacio suficiente para el botón inferior pero sin dejar hueco excesivo
+  height: '100%',
+  width: '100%',
+  maxHeight: 'calc(100vh - 150px)', // Permite que la tarjeta crezca más antes de tocar el footer
+  minHeight: '360px' // Mantiene una presencia generosa incluso en pantallas pequeñas
 };
 
 const CARD_STYLES = {
