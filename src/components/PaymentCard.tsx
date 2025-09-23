@@ -39,8 +39,8 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
     width: 'min(100%, 560px)',
     maxWidth: '560px',
     height: '100%',
-    maxHeight: 'calc(100vh - 220px)',
-    minHeight: 'clamp(420px, 64vh, 600px)'
+    maxHeight: 'min(680px, calc(100vh - 160px))',
+    minHeight: 'min(420px, calc(100vh - 160px))'
   } as const;
   const appointmentDate = useMemo(() => new Date(appointment.fecha), [appointment.fecha]);
   const formattedTime = useMemo(

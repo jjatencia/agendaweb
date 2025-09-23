@@ -70,6 +70,13 @@ export const CommentIcon = createIcon(
   <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
 );
 
+export const MailIcon = createIcon(
+  <>
+    <rect x="3" y="5" width="18" height="14" rx="2" ry="2" />
+    <polyline points="3,7 12,13 21,7" />
+  </>
+);
+
 export const ProfessionalIcon = createIcon(
   <>
     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
