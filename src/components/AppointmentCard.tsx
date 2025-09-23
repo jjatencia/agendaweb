@@ -215,7 +215,7 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
 
           <div className="text-center space-y-0.5">
             <h2
-              className={`text-base font-semibold tracking-tight ${
+              className={`text-xl font-semibold tracking-tight ${
                 isDisabled ? 'text-gray-500' : 'text-gray-900'
               }`}
             >
