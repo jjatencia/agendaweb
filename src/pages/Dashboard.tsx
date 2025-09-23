@@ -96,7 +96,7 @@ const Dashboard: React.FC = () => {
         ) : (
           <>
             {viewMode === ViewMode.CARDS ? (
-              <div className="flex-1 flex items-start justify-center px-4 pt-8">
+              <div className="flex-1 flex items-stretch justify-center px-4 pt-4 pb-2 sm:pt-6 sm:pb-4">
                 <CardStack
                   appointments={filteredAppointments}
                   currentIndex={currentIndex}
