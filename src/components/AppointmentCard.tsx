@@ -4,10 +4,12 @@ import { Appointment } from '../types';
 import { isAppointmentDisabled } from '../utils/helpers';
 import { PromocionesService } from '../services/promocionesService';
 import {
+  ClockIcon,
   CommentIcon,
   DiscountIcon,
   LocationIcon,
   PhoneIcon,
+  ProfessionalIcon,
   ServiceIcon,
   VariantIcon
 } from './icons';
@@ -27,6 +29,7 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
   onClick
 }) => {
   const isDisabled = isAppointmentDisabled(appointment);
+  const primaryService = appointment.servicios[0];
 
   // Debug saldo en móvil
   React.useEffect(() => {
@@ -98,20 +101,77 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
     });
   }, [appointment.promocion]);
 
+  const cardSizeStyle = {
+    width: 'min(100%, 560px)',
+    maxWidth: '560px',
+    height: '100%',
+    maxHeight: 'calc(100vh - 220px)',
+    minHeight: 'clamp(420px, 64vh, 600px)'
+  } as const;
+
+  const infoTileClass = `${
+    isDisabled ? 'bg-gray-100 text-gray-400' : 'bg-gray-50 text-gray-700'
+  } rounded-2xl px-4 py-3`;
+  const infoLabelClass = `text-xs font-semibold tracking-wide uppercase ${
+    isDisabled ? 'text-gray-400' : 'text-gray-500'
+  }`;
+  const infoMutedClass = isDisabled ? 'text-gray-400' : 'text-gray-600';
+  const infoValueClass = `text-base font-semibold leading-snug ${
+    isDisabled ? 'text-gray-400' : 'text-gray-800'
+  }`;
+  const formattedDuration = useMemo(() => {
+    const raw = (appointment.duracion || primaryService?.duracion || '').toString().trim();
+
+    if (!raw) {
+      return null;
+    }
+
+    if (/^\d+$/.test(raw)) {
+      const minutes = parseInt(raw, 10);
+      if (Number.isNaN(minutes)) {
+        return raw;
+      }
+      return `${minutes} min`;
+    }
+
+    const isoMatch = raw.match(/^PT(?:(\d+)H)?(?:(\d+)M)?$/i);
+    if (isoMatch) {
+      const [, hoursStr, minutesStr] = isoMatch;
+      const hours = hoursStr ? parseInt(hoursStr, 10) : 0;
+      const minutes = minutesStr ? parseInt(minutesStr, 10) : 0;
+      const parts: string[] = [];
+      if (hours > 0) parts.push(`${hours} h`);
+      if (minutes > 0) parts.push(`${minutes} min`);
+      return parts.length > 0 ? parts.join(' ') : '0 min';
+    }
+
+    const timeParts = raw.split(':').map(part => Number(part));
+    if (timeParts.length >= 2 && timeParts.every(part => !Number.isNaN(part))) {
+      const [hours, minutes] = timeParts;
+      const parts: string[] = [];
+      if (hours > 0) parts.push(`${hours} h`);
+      if (minutes > 0) parts.push(`${minutes} min`);
+      return parts.length > 0 ? parts.join(' ') : '0 min';
+    }
+
+    return raw;
+  }, [appointment.duracion, primaryService?.duracion]);
+  const promotionPillClass = isDisabled
+    ? 'bg-gray-200 text-gray-500'
+    : 'bg-green-50 text-green-700';
+
   return (
     <animated.div
       style={{
         ...style,
         backgroundColor: isDisabled ? '#f8f9fa' : 'white',
-        borderRadius: '20px',
-        boxShadow: isDisabled ? '0 2px 8px rgba(0, 0, 0, 0.04)' : '0 4px 15px rgba(0, 0, 0, 0.08)',
+        borderRadius: '24px',
+        boxShadow: isDisabled
+          ? '0 10px 30px rgba(15, 23, 42, 0.05)'
+          : '0 22px 45px rgba(85, 91, 246, 0.15)',
         cursor: isDisabled ? 'default' : 'pointer',
         zIndex: isActive ? 20 : 10,
-        width: '95%',
-        maxWidth: '420px',
-        height: '88%', // Mayor altura para aprovechar mejor el espacio disponible
-        maxHeight: '520px', // Altura máxima más generosa sin invadir la navegación inferior
-        minHeight: '320px', // Mantiene una presencia visual adecuada incluso en pantallas pequeñas
+        ...cardSizeStyle,
         margin: '0 auto',
         position: 'relative',
         opacity: isDisabled ? 0.6 : 1,
@@ -119,35 +179,36 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
       }}
       onClick={isDisabled ? undefined : onClick}
     >
-      <div className="p-6 h-full flex flex-col overflow-hidden">
+      <div className="p-8 h-full flex flex-col gap-6 overflow-hidden">
         {/* Top section - Header */}
-        <div className="flex-shrink-0">
-          {/* Badge de estado pagada o saldo disponible */}
+        <div className="flex-shrink-0 space-y-4">
           {appointment.pagada ? (
-            <div className="flex justify-center items-center mb-3">
-              <span className="text-xs bg-green-100 text-green-800 px-3 py-1 rounded-full font-medium">
+            <div className="flex justify-center">
+              <span className="text-xs bg-green-100 text-green-800 px-4 py-1.5 rounded-full font-semibold tracking-wide">
                 PAGADA
               </span>
             </div>
           ) : (
-            <div className="flex justify-center items-center mb-3">
-              <span className="text-xs bg-blue-100 text-blue-800 px-3 py-1 rounded-full font-medium">
+            <div className="flex justify-center">
+              <span className="text-xs bg-blue-100 text-blue-800 px-4 py-1.5 rounded-full font-semibold tracking-wide">
                 Saldo: €{(appointment.usuario.saldoMonedero || 0).toFixed(2)}
               </span>
             </div>
           )}
 
-          {/* Cliente Name */}
-          <div className="text-center mb-3">
-            <h2 className={`text-3xl font-bold leading-tight ${isDisabled ? 'text-gray-500' : 'text-gray-900'}`}>
+          <div className="text-center space-y-1">
+            <h2
+              className={`text-2xl font-bold tracking-tight ${
+                isDisabled ? 'text-gray-500' : 'text-gray-900'
+              }`}
+            >
               {appointment.usuario.nombre} {appointment.usuario.apellidos}
             </h2>
           </div>
 
-          {/* Hora */}
-          <div className="text-center mb-5">
+          <div className="text-center">
             <div
-              className="text-5xl font-bold leading-none"
+              className="text-5xl font-black leading-none"
               style={{ color: isDisabled ? '#9ca3af' : 'var(--exora-primary)' }}
             >
               {formattedTime}
@@ -156,105 +217,135 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
         </div>
 
         {/* Middle section - Information */}
-        <div className="flex-1 space-y-4 min-h-0">
-          <div className={`flex items-center space-x-3 ${isDisabled ? 'text-gray-400' : 'text-gray-700'}`}>
-            <PhoneIcon size={16} />
-            <a
-              href={`tel:${appointment.usuario.telefono}`}
-              className={`text-base hover:underline ${isDisabled ? 'text-gray-400 pointer-events-none' : 'text-blue-600 hover:text-blue-800'}`}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {appointment.usuario.telefono}
-            </a>
+        <div className="flex-1 overflow-y-auto space-y-4 pr-1">
+          <div className={`${infoTileClass} flex items-start gap-3`}>
+            <PhoneIcon size={18} className="mt-1" />
+            <div className="flex-1">
+              <div className={infoLabelClass}>Teléfono</div>
+              <a
+                href={`tel:${appointment.usuario.telefono}`}
+                className={`text-base font-semibold tracking-tight ${
+                  isDisabled ? 'text-gray-400 pointer-events-none' : 'hover:underline'
+                }`}
+                style={{ color: isDisabled ? undefined : 'var(--exora-primary)' }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {appointment.usuario.telefono}
+              </a>
+            </div>
           </div>
 
-          <div className={`flex items-start space-x-3 ${isDisabled ? 'text-gray-400' : 'text-gray-700'}`}>
-            <ServiceIcon size={16} />
+          <div className={`${infoTileClass} flex items-start gap-3`}>
+            <ServiceIcon size={18} className="mt-1" />
             <div className="flex-1">
-              <div className="text-base font-medium">
-                {appointment.servicios[0]?.nombre || 'Servicio no especificado'}
+              <div className={infoLabelClass}>Servicio</div>
+              <div className={infoValueClass}>
+                {primaryService?.nombre || 'Servicio no especificado'}
               </div>
             </div>
           </div>
 
-          {appointment.variantes && appointment.variantes.length > 0 && (
-            <div className={`flex items-start space-x-3 ${isDisabled ? 'text-gray-400' : 'text-gray-700'}`}>
-              <VariantIcon size={16} />
+          {appointment.profesional?.nombre && (
+            <div className={`${infoTileClass} flex items-start gap-3`}>
+              <ProfessionalIcon size={18} className="mt-1" />
               <div className="flex-1">
-                <div className="text-base font-medium">Variante:</div>
-                <div className={`text-sm mt-1 ${isDisabled ? 'text-gray-400' : 'text-gray-600'}`}>
+                <div className={infoLabelClass}>Profesional</div>
+                <div className={infoValueClass}>{appointment.profesional.nombre}</div>
+              </div>
+            </div>
+          )}
+
+          {appointment.variantes && appointment.variantes.length > 0 && (
+            <div className={`${infoTileClass} flex items-start gap-3`}>
+              <VariantIcon size={18} className="mt-1" />
+              <div className="flex-1">
+                <div className={infoLabelClass}>Variante</div>
+                <div className={`text-sm leading-relaxed ${infoMutedClass}`}>
                   {appointment.variantes.map(v => v.nombre).join(', ')}
                 </div>
               </div>
             </div>
           )}
 
-          <div className={`flex items-center space-x-3 ${isDisabled ? 'text-gray-400' : 'text-gray-700'}`}>
-            <LocationIcon size={16} />
-            <span className="text-base">{appointment.sucursal.nombre}</span>
+          <div className={`${infoTileClass} flex items-start gap-3`}>
+            <LocationIcon size={18} className="mt-1" />
+            <div>
+              <div className={infoLabelClass}>Sucursal</div>
+              <span className={infoValueClass}>{appointment.sucursal.nombre}</span>
+            </div>
           </div>
 
+          {formattedDuration && (
+            <div className={`${infoTileClass} flex items-start gap-3`}>
+              <ClockIcon size={18} className="mt-1" />
+              <div>
+                <div className={infoLabelClass}>Duración</div>
+                <span className={infoValueClass}>{formattedDuration}</span>
+              </div>
+            </div>
+          )}
 
-          {/* Promociones */}
-          <div className={`flex items-start space-x-3 ${isDisabled ? 'text-gray-400' : 'text-gray-700'}`}>
-            <DiscountIcon size={16} />
+          <div className={`${infoTileClass} flex items-start gap-3`}>
+            <DiscountIcon size={18} className="mt-1" />
             <div className="flex-1">
-              <div className="text-base font-medium">Promociones:</div>
+              <div className={infoLabelClass}>Promociones</div>
               {appointment.promocion.length > 0 ? (
-                <div className={`text-sm mt-1 ${isDisabled ? 'text-gray-400' : 'text-gray-600'}`}>
-              {promotionLabels.map(({ key, label }) => (
-                <span
-                  key={key}
-                  className="bg-green-50 text-green-700 px-2 py-1 rounded-md inline-block mr-1 mb-1"
-                >
-                  {label}
-                </span>
-              ))}
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {promotionLabels.map(({ key, label }) => (
+                    <span
+                      key={key}
+                      className={`px-3 py-1 rounded-full text-xs font-semibold ${promotionPillClass}`}
+                    >
+                      {label}
+                    </span>
+                  ))}
                 </div>
               ) : (
-                <div className="text-sm text-gray-600 mt-1">No</div>
+                <div className={`text-sm mt-2 ${infoMutedClass}`}>No</div>
               )}
             </div>
           </div>
 
           {appointment.comentarios && appointment.comentarios.length > 0 && (
-            <div className="flex items-start space-x-3 text-gray-700 pt-3 border-t border-gray-200 mt-4">
-              <div className="flex-shrink-0">
+            <div className={`${infoTileClass} flex flex-col gap-2`}>
+              <div className="flex items-center gap-2 text-sm font-semibold">
                 <CommentIcon size={16} />
+                <span>Comentarios</span>
               </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium text-gray-800 mb-2">Comentarios:</div>
-                <div className="text-sm text-gray-600 leading-relaxed break-words">
-                  {appointment.comentarios.map(comentario =>
-                    typeof comentario === 'string' ? comentario :
-                    (comentario?.texto || comentario?.comentario || JSON.stringify(comentario))
-                  ).join(' | ')}
-                </div>
+              <div className={`text-sm leading-relaxed ${infoMutedClass}`}>
+                {appointment.comentarios
+                  .map(comentario =>
+                    typeof comentario === 'string'
+                      ? comentario
+                      : (comentario?.texto || comentario?.comentario || JSON.stringify(comentario))
+                  )
+                  .join(' | ')}
               </div>
             </div>
           )}
 
           {appointment.usuario.comentarios && appointment.usuario.comentarios.length > 0 && (
-            <div className="flex items-start space-x-3 text-gray-700 pt-3 border-t border-gray-200 mt-4">
-              <div className="flex-shrink-0">
+            <div className={`${infoTileClass} flex flex-col gap-2`}>
+              <div className="flex items-center gap-2 text-sm font-semibold">
                 <CommentIcon size={16} />
+                <span>Comentarios del cliente</span>
               </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium text-gray-800 mb-2">Comentarios del cliente:</div>
-                <div className="text-sm text-gray-600 leading-relaxed break-words">
-                  {appointment.usuario.comentarios.map(comentario =>
-                    typeof comentario === 'string' ? comentario :
-                    (comentario?.texto || comentario?.comentario || JSON.stringify(comentario))
-                  ).join(' | ')}
-                </div>
+              <div className={`text-sm leading-relaxed ${infoMutedClass}`}>
+                {appointment.usuario.comentarios
+                  .map(comentario =>
+                    typeof comentario === 'string'
+                      ? comentario
+                      : (comentario?.texto || comentario?.comentario || JSON.stringify(comentario))
+                  )
+                  .join(' | ')}
               </div>
             </div>
           )}
         </div>
 
         {/* Bottom section - Date */}
-        <div className="flex-shrink-0 pt-3 border-t border-gray-100 text-center">
-          <div className="text-sm text-gray-500">
+        <div className="flex-shrink-0 pt-2 text-center">
+          <div className="text-sm font-medium text-gray-500">
             {formattedDate}
           </div>
         </div>

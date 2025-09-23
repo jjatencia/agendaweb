@@ -35,6 +35,13 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
   const [variantesSeleccionadas, setVariantesSeleccionadas] = useState<Variante[]>(appointment.variantes || []);
   const [promocionesSeleccionadas, setPromocionesSeleccionadas] = useState<string[]>(appointment.promocion || []);
   const [precioCalculado, setPrecioCalculado] = useState<number>(appointment.importe);
+  const cardSizeStyle = {
+    width: 'min(100%, 560px)',
+    maxWidth: '560px',
+    height: '100%',
+    maxHeight: 'calc(100vh - 220px)',
+    minHeight: 'clamp(420px, 64vh, 600px)'
+  } as const;
   const appointmentDate = useMemo(() => new Date(appointment.fecha), [appointment.fecha]);
   const formattedTime = useMemo(
     () =>
@@ -195,21 +202,17 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
     <animated.div
       style={{
         backgroundColor: '#FCFFA8', // Amarillo personalizado
-        borderRadius: '20px',
-        boxShadow: '0 4px 15px rgba(0, 0, 0, 0.15)',
-        width: '90%',
-        maxWidth: '380px',
-        height: '90%',
-        maxHeight: '550px',
-        minHeight: '400px',
+        borderRadius: '24px',
+        boxShadow: '0 22px 45px rgba(85, 91, 246, 0.18)',
+        ...cardSizeStyle,
         margin: '0 auto',
         position: 'relative',
         overflow: 'hidden'
       }}
     >
-      <div className="p-4 h-full flex flex-col relative">
+      <div className="p-7 h-full flex flex-col relative gap-7 overflow-hidden">
         {/* Header */}
-        <div className="flex-shrink-0 text-center mb-4 mt-6">
+        <div className="flex-shrink-0 text-center pt-2 space-y-1">
           <h2 className="text-xl font-bold mb-1" style={{ color: '#555BF6' }}>
             {appointment.usuario.nombre}
           </h2>
@@ -219,7 +222,7 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
         </div>
 
         {/* Service Info */}
-        <div className="flex-1 space-y-3 mb-4 overflow-y-auto">
+        <div className="flex-1 space-y-5 overflow-y-auto pr-1">
           {/* Botón de editar */}
           <div className="flex justify-between items-center">
             <div className="text-base font-medium" style={{ color: '#555BF6' }}>

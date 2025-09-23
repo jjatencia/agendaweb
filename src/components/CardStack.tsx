@@ -17,22 +17,25 @@ interface CardStackProps {
 
 // Style constants - Hacer las tarjetas más grandes y mejor distribuidas
 const CONTAINER_STYLE = {
-  // Usar más espacio para las tarjetas pero dejar espacio para botón inferior
+  // Alinear las tarjetas bajo el header y aprovechar mejor el alto disponible
   flex: '1',
   display: 'flex',
   flexDirection: 'column' as const,
-  justifyContent: 'center' as const,
+  justifyContent: 'flex-start' as const,
   alignItems: 'center' as const,
-  padding: '1rem',
-  paddingBottom: '110px', // Espacio suficiente para el botón inferior sin dejar hueco excesivo
-  // Altura ajustada para móviles pequeños y cuando se abre consola
-  maxHeight: 'calc(100vh - 200px)', // Reduce el espacio restado para permitir tarjetas más altas
-  minHeight: '320px' // Altura mínima ligeramente mayor para mantener proporción agradable
+  paddingLeft: '1rem',
+  paddingRight: '1rem',
+  paddingTop: '1.5rem',
+  paddingBottom: '72px', // Espacio suficiente para el bottom nav sin dejar hueco extra
+  width: '100%',
+  height: '100%',
+  maxWidth: '560px',
+  boxSizing: 'border-box' as const
 };
 
 const CARD_STYLES = {
-  base: "absolute w-full h-full flex justify-center items-center transition-all duration-400 ease-in-out",
-  current: "absolute w-full h-full flex justify-center items-center"
+  base: "absolute inset-0 w-full h-full flex justify-center items-start pt-2 transition-all duration-400 ease-in-out",
+  current: "absolute inset-0 w-full h-full flex justify-center items-start pt-2"
 };
 
 const LAYER_STYLES = {
@@ -43,7 +46,7 @@ const LAYER_STYLES = {
 
 const INDICATORS_STYLE = {
   zIndex: 4,
-  marginBottom: '8px'
+  marginBottom: '0'
 };
 
 const CardStack: React.FC<CardStackProps> = ({
@@ -103,7 +106,7 @@ const CardStack: React.FC<CardStackProps> = ({
 
   return (
     <div
-      className="relative w-full flex items-center justify-center"
+      className="relative w-full h-full flex justify-center"
       style={CONTAINER_STYLE}
     >
       {/* Background cards for 3D stack effect */}
@@ -181,7 +184,7 @@ const CardStack: React.FC<CardStackProps> = ({
       {/* Visual indicators */}
       {appointments.length > 1 && (
         <div
-          className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-2"
+          className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex space-x-2"
           style={INDICATORS_STYLE}
         >
           {appointments.map((_, index) => (

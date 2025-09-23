@@ -70,6 +70,13 @@ export const CommentIcon = createIcon(
   <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
 );
 
+export const ProfessionalIcon = createIcon(
+  <>
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
+  </>
+);
+
 export const CashIcon = createIcon(
   <>
     <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
