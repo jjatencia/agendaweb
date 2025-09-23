@@ -4,15 +4,58 @@ import { Appointment } from '../types';
 import { isAppointmentDisabled } from '../utils/helpers';
 import { PromocionesService } from '../services/promocionesService';
 import {
-  ClockIcon,
-  CommentIcon,
   DiscountIcon,
-  LocationIcon,
   PhoneIcon,
   ProfessionalIcon,
   ServiceIcon,
-  VariantIcon
+  VariantIcon,
+  MailIcon
 } from './icons';
+
+const normalizeComments = (
+  comments?: (string | Record<string, unknown>)[] | string | null
+): string[] => {
+  if (!comments) {
+    return [];
+  }
+
+  const commentList = Array.isArray(comments) ? comments : [comments];
+
+  return commentList
+    .map(comment => {
+      if (!comment) {
+        return '';
+      }
+
+      if (typeof comment === 'string') {
+        return comment.trim();
+      }
+
+      if (typeof comment === 'object') {
+        const value =
+          (comment as Record<string, unknown>).texto ??
+          (comment as Record<string, unknown>).comentario ??
+          (comment as Record<string, unknown>).mensaje ??
+          '';
+
+        if (typeof value === 'string') {
+          return value.trim();
+        }
+
+        if (value != null) {
+          return String(value).trim();
+        }
+      }
+
+      try {
+        return JSON.stringify(comment);
+      } catch (error) {
+        return '';
+      }
+    })
+    .map(text => text.replace(/\s+/g, ' ').trim())
+    .filter(Boolean);
+};
 
 interface AppointmentCardProps {
   appointment: Appointment;
@@ -101,61 +144,35 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
     });
   }, [appointment.promocion]);
 
+  const appointmentComments = useMemo(
+    () => normalizeComments(appointment.comentarios),
+    [appointment.comentarios]
+  );
+
+  const clientComments = useMemo(
+    () => normalizeComments(appointment.usuario?.comentarios),
+    [appointment.usuario?.comentarios]
+  );
+
   const cardSizeStyle = {
     width: 'min(100%, 560px)',
     maxWidth: '560px',
     height: '100%',
-    maxHeight: 'calc(100vh - 220px)',
-    minHeight: 'clamp(420px, 64vh, 600px)'
+    maxHeight: 'min(680px, calc(100vh - 160px))',
+    minHeight: 'min(420px, calc(100vh - 160px))'
   } as const;
 
   const infoTileClass = `${
     isDisabled ? 'bg-gray-100 text-gray-400' : 'bg-gray-50 text-gray-700'
   } rounded-2xl px-3 py-2.5`;
-  const infoLabelClass = `text-[11px] font-semibold tracking-wide uppercase ${
+  const infoInlineRowClass = 'flex flex-wrap items-center gap-x-2 gap-y-1';
+  const infoInlineLabelClass = `text-[12px] font-semibold ${
     isDisabled ? 'text-gray-400' : 'text-gray-500'
   }`;
   const infoMutedClass = isDisabled ? 'text-gray-400' : 'text-gray-600';
-  const infoValueClass = `text-[13px] font-semibold leading-snug ${
+  const infoValueClass = `text-[13px] font-semibold leading-snug tracking-tight ${
     isDisabled ? 'text-gray-400' : 'text-gray-800'
   }`;
-  const formattedDuration = useMemo(() => {
-    const raw = (appointment.duracion || primaryService?.duracion || '').toString().trim();
-
-    if (!raw) {
-      return null;
-    }
-
-    if (/^\d+$/.test(raw)) {
-      const minutes = parseInt(raw, 10);
-      if (Number.isNaN(minutes)) {
-        return raw;
-      }
-      return `${minutes} min`;
-    }
-
-    const isoMatch = raw.match(/^PT(?:(\d+)H)?(?:(\d+)M)?$/i);
-    if (isoMatch) {
-      const [, hoursStr, minutesStr] = isoMatch;
-      const hours = hoursStr ? parseInt(hoursStr, 10) : 0;
-      const minutes = minutesStr ? parseInt(minutesStr, 10) : 0;
-      const parts: string[] = [];
-      if (hours > 0) parts.push(`${hours} h`);
-      if (minutes > 0) parts.push(`${minutes} min`);
-      return parts.length > 0 ? parts.join(' ') : '0 min';
-    }
-
-    const timeParts = raw.split(':').map(part => Number(part));
-    if (timeParts.length >= 2 && timeParts.every(part => !Number.isNaN(part))) {
-      const [hours, minutes] = timeParts;
-      const parts: string[] = [];
-      if (hours > 0) parts.push(`${hours} h`);
-      if (minutes > 0) parts.push(`${minutes} min`);
-      return parts.length > 0 ? parts.join(' ') : '0 min';
-    }
-
-    return raw;
-  }, [appointment.duracion, primaryService?.duracion]);
   const promotionPillClass = isDisabled
     ? 'bg-gray-200 text-gray-500'
     : 'bg-green-50 text-green-700';
@@ -220,12 +237,12 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
         <div className="flex-1 overflow-y-auto space-y-3 pr-1">
           <div className={`${infoTileClass} flex items-start gap-2.5`}>
             <PhoneIcon size={16} className="mt-0.5" />
-            <div className="flex-1">
-              <div className={infoLabelClass}>Teléfono</div>
+            <div className={`${infoInlineRowClass} flex-1`}>
+              <span className={infoInlineLabelClass}>Teléfono:</span>
               <a
                 href={`tel:${appointment.usuario.telefono}`}
-                className={`text-sm font-semibold tracking-tight ${
-                  isDisabled ? 'text-gray-400 pointer-events-none' : 'hover:underline'
+                className={`${infoValueClass} ${
+                  isDisabled ? 'pointer-events-none' : 'hover:underline'
                 }`}
                 style={{ color: isDisabled ? undefined : 'var(--exora-primary)' }}
                 onClick={(e) => e.stopPropagation()}
@@ -237,20 +254,20 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
 
           <div className={`${infoTileClass} flex items-start gap-2.5`}>
             <ServiceIcon size={16} className="mt-0.5" />
-            <div className="flex-1">
-              <div className={infoLabelClass}>Servicio</div>
-              <div className={infoValueClass}>
+            <div className={`${infoInlineRowClass} flex-1`}>
+              <span className={infoInlineLabelClass}>Servicio:</span>
+              <span className={`${infoValueClass} break-words`}>
                 {primaryService?.nombre || 'Servicio no especificado'}
-              </div>
+              </span>
             </div>
           </div>
 
           {appointment.profesional?.nombre && (
             <div className={`${infoTileClass} flex items-start gap-2.5`}>
               <ProfessionalIcon size={16} className="mt-0.5" />
-              <div className="flex-1">
-                <div className={infoLabelClass}>Profesional</div>
-                <div className={infoValueClass}>{appointment.profesional.nombre}</div>
+              <div className={`${infoInlineRowClass} flex-1`}>
+                <span className={infoInlineLabelClass}>Profesional:</span>
+                <span className={infoValueClass}>{appointment.profesional.nombre}</span>
               </div>
             </div>
           )}
@@ -258,94 +275,60 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
           {appointment.variantes && appointment.variantes.length > 0 && (
             <div className={`${infoTileClass} flex items-start gap-2.5`}>
               <VariantIcon size={16} className="mt-0.5" />
-              <div className="flex-1">
-                <div className={infoLabelClass}>Variante</div>
-                <div className={`text-xs leading-relaxed ${infoMutedClass}`}>
+              <div className={`${infoInlineRowClass} flex-1`}>
+                <span className={infoInlineLabelClass}>Variante:</span>
+                <span className={`text-[13px] font-medium leading-snug tracking-tight ${infoMutedClass}`}>
                   {appointment.variantes.map(v => v.nombre).join(', ')}
-                </div>
-              </div>
-            </div>
-          )}
-
-          <div className={`${infoTileClass} flex items-start gap-2.5`}>
-            <LocationIcon size={16} className="mt-0.5" />
-            <div>
-              <div className={infoLabelClass}>Sucursal</div>
-              <span className={infoValueClass}>{appointment.sucursal.nombre}</span>
-            </div>
-          </div>
-
-          {formattedDuration && (
-            <div className={`${infoTileClass} flex items-start gap-2.5`}>
-              <ClockIcon size={16} className="mt-0.5" />
-              <div>
-                <div className={infoLabelClass}>Duración</div>
-                <span className={infoValueClass}>{formattedDuration}</span>
+                </span>
               </div>
             </div>
           )}
 
           <div className={`${infoTileClass} flex items-start gap-2.5`}>
             <DiscountIcon size={16} className="mt-0.5" />
-              <div className="flex-1">
-                <div className={infoLabelClass}>Promociones</div>
-                {appointment.promocion.length > 0 ? (
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {promotionLabels.map(({ key, label }) => (
-                      <span
-                        key={key}
-                        className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${promotionPillClass}`}
-                      >
-                        {label}
-                      </span>
-                    ))}
-                  </div>
+            <div className={`${infoInlineRowClass} flex-1`}>
+              <span className={infoInlineLabelClass}>Promociones:</span>
+              {appointment.promocion.length > 0 ? (
+                <div className="flex flex-wrap items-center gap-2">
+                  {promotionLabels.map(({ key, label }) => (
+                    <span
+                      key={key}
+                      className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${promotionPillClass}`}
+                    >
+                      {label}
+                    </span>
+                  ))}
+                </div>
               ) : (
-                <div className={`text-xs mt-2 ${infoMutedClass}`}>No</div>
+                <span className={`text-[13px] font-medium ${infoMutedClass}`}>No</span>
               )}
             </div>
           </div>
 
-          {appointment.comentarios && appointment.comentarios.length > 0 && (
-            <div className={`${infoTileClass} flex flex-col gap-2`}>
-              <div
-                className={`flex items-center gap-2 text-xs font-semibold uppercase tracking-wide ${
-                  isDisabled ? 'text-gray-400' : 'text-gray-500'
-                }`}
-              >
-                <CommentIcon size={14} />
-                <span>Comentarios</span>
-              </div>
-              <div className={`text-xs leading-relaxed ${infoMutedClass}`}>
-                {appointment.comentarios
-                  .map(comentario =>
-                    typeof comentario === 'string'
-                      ? comentario
-                      : (comentario?.texto || comentario?.comentario || JSON.stringify(comentario))
-                  )
-                  .join(' | ')}
+          {appointmentComments.length > 0 && (
+            <div className={`${infoTileClass} flex items-start gap-2.5`}>
+              <MailIcon size={16} className="mt-0.5" />
+              <div className="space-y-1 flex-1">
+                <span className={`${infoInlineLabelClass} uppercase tracking-wide`}>
+                  Comentarios de la cita:
+                </span>
+                <p className={`text-[12px] leading-relaxed ${infoMutedClass}`}>
+                  {appointmentComments.join(' | ')}
+                </p>
               </div>
             </div>
           )}
 
-          {appointment.usuario.comentarios && appointment.usuario.comentarios.length > 0 && (
-            <div className={`${infoTileClass} flex flex-col gap-2`}>
-              <div
-                className={`flex items-center gap-2 text-xs font-semibold uppercase tracking-wide ${
-                  isDisabled ? 'text-gray-400' : 'text-gray-500'
-                }`}
-              >
-                <CommentIcon size={14} />
-                <span>Comentarios del cliente</span>
-              </div>
-              <div className={`text-xs leading-relaxed ${infoMutedClass}`}>
-                {appointment.usuario.comentarios
-                  .map(comentario =>
-                    typeof comentario === 'string'
-                      ? comentario
-                      : (comentario?.texto || comentario?.comentario || JSON.stringify(comentario))
-                  )
-                  .join(' | ')}
+          {clientComments.length > 0 && (
+            <div className={`${infoTileClass} flex items-start gap-2.5`}>
+              <MailIcon size={16} className="mt-0.5" />
+              <div className="space-y-1 flex-1">
+                <span className={`${infoInlineLabelClass} uppercase tracking-wide`}>
+                  Comentarios del cliente:
+                </span>
+                <p className={`text-[12px] leading-relaxed ${infoMutedClass}`}>
+                  {clientComments.join(' | ')}
+                </p>
               </div>
             </div>
           )}
