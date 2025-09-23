@@ -25,8 +25,8 @@ const CONTAINER_STYLE = {
   alignItems: 'center' as const,
   paddingLeft: '1rem',
   paddingRight: '1rem',
-  paddingTop: '1.5rem',
-  paddingBottom: '72px', // Espacio suficiente para el bottom nav sin dejar hueco extra
+  paddingTop: '0.75rem',
+  paddingBottom: '64px', // Ajuste para que la tarjeta llegue justo hasta el footer
   width: '100%',
   height: '100%',
   maxWidth: '560px',
@@ -34,8 +34,8 @@ const CONTAINER_STYLE = {
 };
 
 const CARD_STYLES = {
-  base: "absolute inset-0 w-full h-full flex justify-center items-start pt-2 transition-all duration-400 ease-in-out",
-  current: "absolute inset-0 w-full h-full flex justify-center items-start pt-2"
+  base: "absolute inset-0 w-full h-full flex justify-center items-stretch transition-all duration-400 ease-in-out",
+  current: "absolute inset-0 w-full h-full flex justify-center items-stretch"
 };
 
 const LAYER_STYLES = {
