@@ -1,5 +1,4 @@
 import { Appointment } from '../types';
-import { PromocionesService } from './promocionesService';
 import { ServiciosService } from './serviciosService';
 
 export interface VentaData {
@@ -44,61 +43,8 @@ const isTokenExpired = (token: string): boolean => {
   }
 };
 
-// Función para calcular descuentos basado en promociones
-const calcularDescuentoPromociones = async (appointment: Appointment): Promise<{ importeConDescuento: number; descuentoTotal: number }> => {
-  if (!appointment.promocion || appointment.promocion.length === 0) {
-    return {
-      importeConDescuento: appointment.importe,
-      descuentoTotal: 0
-    };
-  }
 
-  try {
-    // Obtener todas las promociones de la empresa
-    const promocionesEmpresa = await PromocionesService.getPromocionesEmpresa(appointment.empresa);
-
-    // Filtrar solo las promociones aplicadas a esta cita
-    const promocionesAplicadas = promocionesEmpresa.filter(promocion =>
-      appointment.promocion.includes(promocion._id)
-    );
-
-    let descuentoTotal = 0;
-
-    // Calcular descuento total
-    promocionesAplicadas.forEach(promocion => {
-      // Solo aplicar descuentos si la promoción está activa y es de tipo descuento para servicios
-      if (promocion.activo && promocion.tipo === 'descuento' && promocion.destino === 'servicio') {
-        if (promocion.porcentaje !== null && promocion.porcentaje !== undefined) {
-          // Descuento por porcentaje
-          descuentoTotal += appointment.importe * (promocion.porcentaje / 100);
-        } else if (promocion.cifra !== undefined && promocion.cifra > 0) {
-          // Descuento por cantidad fija (en centavos, convertir a euros)
-          descuentoTotal += promocion.cifra / 100;
-        }
-      }
-    });
-
-    const importeConDescuento = Math.max(0, appointment.importe - descuentoTotal);
-
-    if ((import.meta as any).env?.DEV) {
-     
-    }
-
-    return {
-      importeConDescuento,
-      descuentoTotal
-    };
-  } catch (error) {
-    console.error('Error calculando descuentos:', error);
-    // En caso de error, devolver el importe original
-    return {
-      importeConDescuento: appointment.importe,
-      descuentoTotal: 0
-    };
-  }
-};
-
-export const createVenta = async (appointment: Appointment, metodoPago: string): Promise<any> => {
+export const createVenta = async (appointment: Appointment, metodoPago: string, importeFinal?: number): Promise<any> => {
   // Get token from localStorage
   const token = localStorage.getItem((import.meta as any).env?.VITE_TOKEN_STORAGE_KEY || 'exora_auth_token');
 
@@ -127,21 +73,23 @@ export const createVenta = async (appointment: Appointment, metodoPago: string):
 
         if (varianteCompleta) {
           // Devolver la variante tal como viene de la API (formato completo para facturación)
+          // Asegurar que el valor esté en centavos como espera el sistema de facturación
           return {
             ...varianteCompleta,
-            // Asegurar que tenga valorType si no lo tiene
+            valor: varianteCompleta.valor || (varianteAppointment.precio ? varianteAppointment.precio * 100 : 0),
             valorType: varianteCompleta.valorType || 'money'
           };
         }
 
         // Si no se encuentra en la API, construir el objeto completo manualmente
+        // Convertir precio a centavos para el valor (precio viene en euros)
         return {
           _id: varianteAppointment._id,
           empresa: appointment.empresa,
           nombre: varianteAppointment.nombre,
           descripcion: varianteAppointment.descripcion || '',
           tiempo: varianteAppointment.tiempo || 0,
-          valor: varianteAppointment.precio || 0,
+          valor: (varianteAppointment.precio || 0) * 100, // Convertir a centavos
           valorType: 'money',
           servicios: varianteAppointment.servicios || [],
           productos: varianteAppointment.productos || [],
@@ -151,13 +99,14 @@ export const createVenta = async (appointment: Appointment, metodoPago: string):
     } catch (error) {
       console.warn('Error obteniendo variantes completas, usando las del appointment:', error);
       // En caso de error, construir las variantes con el formato completo requerido
+      // Convertir precio a centavos para el valor
       variantesCompletas = appointment.variantes.map(variante => ({
         _id: variante._id,
         empresa: appointment.empresa,
         nombre: variante.nombre,
         descripcion: variante.descripcion || '',
         tiempo: variante.tiempo || 0,
-        valor: variante.precio || 0,
+        valor: (variante.precio || 0) * 100, // Convertir a centavos
         valorType: 'money',
         servicios: variante.servicios || [],
         productos: variante.productos || [],
@@ -166,8 +115,9 @@ export const createVenta = async (appointment: Appointment, metodoPago: string):
     }
   }
 
-  // Calcular descuentos por promociones
-  const { importeConDescuento, descuentoTotal } = await calcularDescuentoPromociones(appointment);
+  // Usar el importe final calculado si se proporciona, sino usar el original
+  // El importe final ya incluye variantes y descuentos calculados por el frontend
+  const importeParaVenta = importeFinal !== undefined ? importeFinal : appointment.importe;
 
   // Preparar los datos como los espera la API (solo IDs, igual que la app que funciona)
   const ventaData: any = {
@@ -176,8 +126,8 @@ export const createVenta = async (appointment: Appointment, metodoPago: string):
     sucursal: appointment.sucursal._id,
     profesional: appointment.profesional._id,
     fechaCita: appointment.fecha,
-    importe: importeConDescuento, // Usar el importe con descuento aplicado
-    promocion: appointment.promocion,
+    importe: importeParaVenta, // Usar el importe final calculado (ya incluye variantes y descuentos)
+    promocion: [], // Enviar array vacío como en el admin - los descuentos ya están aplicados en el importe
     servicios: appointment.servicios.map(servicio => ({
       _id: servicio._id,
       variantes: servicio.variantes || [],
@@ -189,15 +139,7 @@ export const createVenta = async (appointment: Appointment, metodoPago: string):
     variantes: variantesCompletas,
     metodoPago: metodoPago,
     productos: [],
-    cita: appointment._id,
-    // Agregar información de descuentos si los hay
-    ...(descuentoTotal > 0 && {
-      descuentos: [{
-        tipo: 'promocion',
-        valor: descuentoTotal,
-        descripcion: 'Descuento por promociones aplicadas'
-      }]
-    })
+    cita: appointment._id
   };
 
   // Debug info (non-sensitive only)
@@ -205,7 +147,8 @@ export const createVenta = async (appointment: Appointment, metodoPago: string):
     console.log('=== DEBUG VENTA SERVICE ===');
     console.log('Variantes enviadas:', variantesCompletas.length);
     console.log('Ejemplo de variante:', variantesCompletas[0]);
-    console.log('Importe final:', importeConDescuento);
+    console.log('Importe final enviado:', importeParaVenta);
+    console.log('Datos completos de venta:', ventaData);
   }
 
   try {

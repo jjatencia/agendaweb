@@ -388,14 +388,15 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
 
       let editedAppointment: Appointment | undefined;
 
-      // Si hay cambios, crear un appointment actualizado
-      if (hasServiceChanges || hasVariantChanges || hasPromocionChanges) {
+      // Si hay cambios O si el precio final es diferente al original, crear un appointment actualizado
+      const hasPriceChanges = precioConDescuento !== appointment.importe;
+      if (hasServiceChanges || hasVariantChanges || hasPromocionChanges || hasPriceChanges) {
         editedAppointment = {
           ...appointment,
           servicios: servicioSeleccionado ? [servicioSeleccionado] : appointment.servicios,
           variantes: variantesSeleccionadas,
           promocion: promocionesSeleccionadas,
-          importe: precioConDescuento
+          importe: precioConDescuento // Usar el precio final calculado (incluye variantes y descuentos)
         };
       }
 

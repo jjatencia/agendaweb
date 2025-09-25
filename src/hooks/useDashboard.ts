@@ -197,7 +197,10 @@ export const useDashboard = (): UseDashboardResult => {
         // Usar la cita editada si está disponible, caso contrario usar la original
         const appointmentToProcess = editedAppointment || currentAppointment;
 
-        await createVenta(appointmentToProcess, metodoPago);
+        // Pasar el importe final calculado si hay editedAppointment, sino undefined para usar el original
+        const importeFinal = editedAppointment ? editedAppointment.importe : undefined;
+
+        await createVenta(appointmentToProcess, metodoPago, importeFinal);
 
         toast.dismiss();
         toast.success('Pago completado exitosamente');
@@ -235,8 +238,11 @@ export const useDashboard = (): UseDashboardResult => {
         // Usar la cita editada si está disponible, caso contrario usar la original
         const appointmentToProcess = editedAppointment || currentAppointment;
 
-        // Verificar saldo suficiente
-        if (!MonederoService.tieneSaldoSuficiente(appointmentToProcess.usuario.saldoMonedero, appointmentToProcess.importe)) {
+        // Usar el importe final calculado si hay editedAppointment, sino el original
+        const importeFinal = editedAppointment ? editedAppointment.importe : appointmentToProcess.importe;
+
+        // Verificar saldo suficiente con el importe final
+        if (!MonederoService.tieneSaldoSuficiente(appointmentToProcess.usuario.saldoMonedero, importeFinal)) {
           toast.dismiss();
           toast.error('Saldo insuficiente en el monedero');
           return;
@@ -247,7 +253,7 @@ export const useDashboard = (): UseDashboardResult => {
           appointmentToProcess.usuario._id,
           appointmentToProcess.empresa,
           appointmentToProcess._id,
-          appointmentToProcess.importe
+          importeFinal
         );
 
         toast.dismiss();
