@@ -1,5 +1,6 @@
 import { Appointment } from '../types';
 import { PromocionesService } from './promocionesService';
+import { ServiciosService } from './serviciosService';
 
 export interface VentaData {
   usuario: string;
@@ -102,6 +103,56 @@ export const createVenta = async (appointment: Appointment, metodoPago: string):
     throw new Error('Token de autenticación expirado. Por favor, inicia sesión nuevamente.');
   }
 
+  // Obtener variantes completas de la API si existen variantes en el appointment
+  let variantesCompletas = appointment.variantes || [];
+  if (appointment.variantes && appointment.variantes.length > 0) {
+    try {
+      const todasLasVariantes = await ServiciosService.getVariantes(appointment.empresa);
+      variantesCompletas = appointment.variantes.map(varianteAppointment => {
+        const varianteCompleta = todasLasVariantes.find(v =>
+          v._id === varianteAppointment._id ||
+          v.nombre === varianteAppointment.nombre
+        );
+
+        if (varianteCompleta) {
+          // Asegurar que el campo precio se mapee a valor y valorType
+          return {
+            ...varianteCompleta,
+            valor: varianteCompleta.precio || 0,
+            valorType: 'money'
+          };
+        }
+
+        // Si no se encuentra, usar el objeto original con los campos requeridos
+        return {
+          ...varianteAppointment,
+          empresa: appointment.empresa,
+          descripcion: varianteAppointment.descripcion || '',
+          tiempo: varianteAppointment.tiempo || 0,
+          valor: varianteAppointment.precio || 0,
+          valorType: 'money',
+          servicios: varianteAppointment.servicios || [],
+          productos: varianteAppointment.productos || [],
+          deleted: varianteAppointment.deleted || false
+        };
+      });
+    } catch (error) {
+      console.warn('Error obteniendo variantes completas, usando las del appointment:', error);
+      // En caso de error, usar las variantes del appointment con campos mínimos requeridos
+      variantesCompletas = appointment.variantes.map(variante => ({
+        ...variante,
+        empresa: appointment.empresa,
+        descripcion: variante.descripcion || '',
+        tiempo: variante.tiempo || 0,
+        valor: variante.precio || 0,
+        valorType: 'money',
+        servicios: variante.servicios || [],
+        productos: variante.productos || [],
+        deleted: variante.deleted || false
+      }));
+    }
+  }
+
   // Calcular descuentos por promociones
   const { importeConDescuento, descuentoTotal } = await calcularDescuentoPromociones(appointment);
 
@@ -122,7 +173,7 @@ export const createVenta = async (appointment: Appointment, metodoPago: string):
       precio: servicio.precio,
       deleted: servicio.deleted || false
     })),
-    variantes: appointment.variantes,
+    variantes: variantesCompletas,
     metodoPago: metodoPago,
     productos: [],
     cita: appointment._id,

@@ -10,6 +10,7 @@ import { useDashboard } from '../hooks/useDashboard';
 import { ViewMode } from '../types';
 
 const Dashboard: React.FC = () => {
+
   const {
     userName,
     isAuthenticated,
@@ -134,6 +135,7 @@ const Dashboard: React.FC = () => {
           />
         </div>
       )}
+
     </div>
   );
 };

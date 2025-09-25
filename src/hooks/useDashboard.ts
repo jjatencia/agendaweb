@@ -85,6 +85,17 @@ export const useDashboard = (): UseDashboardResult => {
     }
   }, [currentDate, fetchAppointments, isAuthenticated]);
 
+  // Guardar citas en localStorage para recuperación de emergencia
+  useEffect(() => {
+    if (filteredAppointments.length > 0) {
+      const appointmentsWithTimestamp = filteredAppointments.map(apt => ({
+        ...apt,
+        _cached_at: new Date().toISOString()
+      }));
+      localStorage.setItem('exora_recent_appointments', JSON.stringify(appointmentsWithTimestamp));
+    }
+  }, [filteredAppointments]);
+
   const changeDate = useCallback(
     (newDate: string) => {
       setCurrentDate(newDate);
