@@ -127,7 +127,7 @@ export const createVenta = async (appointment: Appointment, metodoPago: string, 
     profesional: appointment.profesional._id,
     fechaCita: appointment.fecha,
     importe: importeParaVenta, // Usar el importe final calculado (ya incluye variantes y descuentos)
-    promocion: [], // Enviar array vacío como en el admin - los descuentos ya están aplicados en el importe
+    promocion: appointment.promocion || [], // Enviar las promociones aplicadas para que se guarden en la cita
     servicios: appointment.servicios.map(servicio => ({
       _id: servicio._id,
       variantes: servicio.variantes || [],
@@ -145,10 +145,13 @@ export const createVenta = async (appointment: Appointment, metodoPago: string, 
   // Debug info (non-sensitive only)
   if ((import.meta as any).env?.DEV) {
     console.log('=== DEBUG VENTA SERVICE ===');
-    console.log('Variantes enviadas:', variantesCompletas.length);
-    console.log('Ejemplo de variante:', variantesCompletas[0]);
+    console.log('Appointment original variantes:', appointment.variantes);
+    console.log('Variantes completas procesadas:', variantesCompletas);
+    console.log('Variantes enviadas count:', variantesCompletas.length);
+    console.log('Ejemplo de variante enviada:', variantesCompletas[0]);
     console.log('Importe final enviado:', importeParaVenta);
-    console.log('Datos completos de venta:', ventaData);
+    console.log('Promociones enviadas:', appointment.promocion);
+    console.log('Datos completos de venta:', JSON.stringify(ventaData, null, 2));
   }
 
   try {
