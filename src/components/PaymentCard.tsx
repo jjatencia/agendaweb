@@ -3,7 +3,6 @@ import { animated } from '@react-spring/web';
 import { Appointment, Servicio, Variante } from '../types';
 import { PromocionesService, Promocion } from '../services/promocionesService';
 import { ServiciosService } from '../services/serviciosService';
-import { MonederoService } from '../services/monederoService';
 import {
   CardIcon,
   CashIcon,
