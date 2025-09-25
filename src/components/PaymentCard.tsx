@@ -295,7 +295,13 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
     if (!activeInput) return;
 
     const numAmount = Math.max(0, parseFloat(inputAmount) || 0);
-    const maxAmount = importeRestante + (paymentAmounts[activeInput] || 0);
+    const baseMaxAmount = importeRestante + (paymentAmounts[activeInput] || 0);
+
+    // Para monedero, limitar también al saldo disponible
+    const maxAmount = activeInput === 'Monedero'
+      ? Math.min(baseMaxAmount, saldoMonedero)
+      : baseMaxAmount;
+
     const finalAmount = Math.min(numAmount, maxAmount);
 
     setPaymentAmounts(prev => ({
@@ -305,14 +311,20 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
 
     setActiveInput(null);
     setInputAmount('');
-  }, [activeInput, inputAmount, importeRestante, paymentAmounts]);
+  }, [activeInput, inputAmount, importeRestante, paymentAmounts, saldoMonedero]);
 
   const handleSetAllAmount = useCallback(() => {
     if (!activeInput) return;
 
-    const maxAmount = importeRestante + (paymentAmounts[activeInput] || 0);
+    const baseMaxAmount = importeRestante + (paymentAmounts[activeInput] || 0);
+
+    // Para monedero, limitar también al saldo disponible
+    const maxAmount = activeInput === 'Monedero'
+      ? Math.min(baseMaxAmount, saldoMonedero)
+      : baseMaxAmount;
+
     setInputAmount(maxAmount.toString());
-  }, [activeInput, importeRestante, paymentAmounts]);
+  }, [activeInput, importeRestante, paymentAmounts, saldoMonedero]);
 
   // Removed unused handlers - keeping for potential future use
   // const handleAmountChange = useCallback((methodId: string, amount: string) => {
@@ -661,7 +673,7 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
                 const isSelected = selectedPaymentMethod === method.id;
                 const hasAmount = paymentAmounts[method.id] > 0;
                 const isWallet = method.id === 'Monedero';
-                const isDisabled = isWallet && !tieneSaldoSuficiente;
+                const isDisabled = isWallet && saldoMonedero <= 0;
 
                 return (
                   <button
@@ -701,7 +713,7 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
                     }}
                     title={
                       isWallet
-                        ? `${method.name} - Saldo: €${saldoMonedero.toFixed(2)}${!tieneSaldoSuficiente ? ' (Insuficiente)' : ''}`
+                        ? `${method.name} - Saldo: €${saldoMonedero.toFixed(2)}${saldoMonedero <= 0 ? ' (Sin saldo)' : ''}`
                         : `${method.name} - Mantén presionado para dividir pago`
                     }
                   >
@@ -719,10 +731,10 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
                       <div className="absolute bottom-1 left-1 right-1 text-center">
                         <div
                           className={`text-xs font-medium rounded px-1 ${
-                            tieneSaldoSuficiente ? 'bg-white/80' : 'bg-red-100'
+                            saldoMonedero > 0 ? 'bg-white/80' : 'bg-red-100'
                           }`}
                           style={{
-                            color: tieneSaldoSuficiente ? '#555BF6' : '#DC2626'
+                            color: saldoMonedero > 0 ? '#555BF6' : '#DC2626'
                           }}
                         >
                           €{saldoMonedero.toFixed(2)}
@@ -730,7 +742,16 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
                       </div>
                     )}
 
-                    {/* Mostrar cantidad asignada en modo dividido (solo para métodos que no son monedero o que tienen saldo suficiente) */}
+                    {/* Mostrar cantidad asignada en modo dividido para monedero si tiene saldo positivo y cantidad asignada */}
+                    {isWallet && isDividedPayment && hasAmount && saldoMonedero > 0 && (
+                      <div className="absolute bottom-1 left-1 right-1 text-center">
+                        <div className="text-xs font-medium bg-white/80 rounded px-1" style={{ color: '#555BF6' }}>
+                          €{paymentAmounts[method.id].toFixed(2)}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Mostrar cantidad asignada en modo dividido para otros métodos */}
                     {!isWallet && isDividedPayment && hasAmount && (
                       <div className="absolute bottom-1 left-1 right-1 text-center">
                         <div className="text-xs font-medium bg-white/80 rounded px-1" style={{ color: '#555BF6' }}>
@@ -773,7 +794,12 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
                     {paymentMethods.find(m => m.id === activeInput)?.name}
                   </div>
                   <div className="text-sm font-medium" style={{ color: '#555BF6', opacity: 0.8 }}>
-                    Máximo: €{(importeRestante + (paymentAmounts[activeInput] || 0)).toFixed(2)}
+                    Máximo: €{(() => {
+                      const baseMax = importeRestante + (paymentAmounts[activeInput] || 0);
+                      return activeInput === 'Monedero'
+                        ? Math.min(baseMax, saldoMonedero).toFixed(2)
+                        : baseMax.toFixed(2);
+                    })()}
                   </div>
                 </div>
 
@@ -792,7 +818,12 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
                       }}
                       step="0.01"
                       min="0"
-                      max={importeRestante + (paymentAmounts[activeInput] || 0)}
+                      max={(() => {
+                        const baseMax = importeRestante + (paymentAmounts[activeInput] || 0);
+                        return activeInput === 'Monedero'
+                          ? Math.min(baseMax, saldoMonedero)
+                          : baseMax;
+                      })()}
                       autoFocus
                     />
                     <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-xl font-bold" style={{ color: '#555BF6' }}>
@@ -810,7 +841,13 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
                     }}
                     disabled={importeRestante <= 0}
                   >
-                    Importe completo: {(importeRestante + (paymentAmounts[activeInput] || 0)).toFixed(2)}€
+                    Importe completo: {(() => {
+                      const baseMax = importeRestante + (paymentAmounts[activeInput] || 0);
+                      const maxAmount = activeInput === 'Monedero'
+                        ? Math.min(baseMax, saldoMonedero)
+                        : baseMax;
+                      return maxAmount.toFixed(2);
+                    })()}€
                   </button>
 
                   <div className="flex gap-3 pt-2">
