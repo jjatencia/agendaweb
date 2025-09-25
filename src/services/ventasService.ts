@@ -17,7 +17,15 @@ export interface VentaData {
   }>;
   variantes: Array<{
     _id: string;
+    empresa: string;
     nombre: string;
+    descripcion: string;
+    tiempo: number;
+    valor: number;
+    valorType: string;
+    servicios: string[];
+    productos: any[];
+    deleted: boolean;
   }>;
   productos: any[];
   metodoPago: string;
@@ -107,26 +115,30 @@ export const createVenta = async (appointment: Appointment, metodoPago: string):
   let variantesCompletas = appointment.variantes || [];
   if (appointment.variantes && appointment.variantes.length > 0) {
     try {
-      const todasLasVariantes = await ServiciosService.getVariantes(appointment.empresa);
+      // Usar el nuevo método que devuelve variantes completas sin normalizar
+      const todasLasVariantesCompletas = await ServiciosService.getVariantesCompletas(appointment.empresa);
+
       variantesCompletas = appointment.variantes.map(varianteAppointment => {
-        const varianteCompleta = todasLasVariantes.find(v =>
+        // Buscar la variante completa en la respuesta de la API
+        const varianteCompleta = todasLasVariantesCompletas.find(v =>
           v._id === varianteAppointment._id ||
           v.nombre === varianteAppointment.nombre
         );
 
         if (varianteCompleta) {
-          // Asegurar que el campo precio se mapee a valor y valorType
+          // Devolver la variante tal como viene de la API (formato completo para facturación)
           return {
             ...varianteCompleta,
-            valor: varianteCompleta.precio || 0,
-            valorType: 'money'
+            // Asegurar que tenga valorType si no lo tiene
+            valorType: varianteCompleta.valorType || 'money'
           };
         }
 
-        // Si no se encuentra, usar el objeto original con los campos requeridos
+        // Si no se encuentra en la API, construir el objeto completo manualmente
         return {
-          ...varianteAppointment,
+          _id: varianteAppointment._id,
           empresa: appointment.empresa,
+          nombre: varianteAppointment.nombre,
           descripcion: varianteAppointment.descripcion || '',
           tiempo: varianteAppointment.tiempo || 0,
           valor: varianteAppointment.precio || 0,
@@ -138,10 +150,11 @@ export const createVenta = async (appointment: Appointment, metodoPago: string):
       });
     } catch (error) {
       console.warn('Error obteniendo variantes completas, usando las del appointment:', error);
-      // En caso de error, usar las variantes del appointment con campos mínimos requeridos
+      // En caso de error, construir las variantes con el formato completo requerido
       variantesCompletas = appointment.variantes.map(variante => ({
-        ...variante,
+        _id: variante._id,
         empresa: appointment.empresa,
+        nombre: variante.nombre,
         descripcion: variante.descripcion || '',
         tiempo: variante.tiempo || 0,
         valor: variante.precio || 0,
@@ -189,7 +202,10 @@ export const createVenta = async (appointment: Appointment, metodoPago: string):
 
   // Debug info (non-sensitive only)
   if ((import.meta as any).env?.DEV) {
-
+    console.log('=== DEBUG VENTA SERVICE ===');
+    console.log('Variantes enviadas:', variantesCompletas.length);
+    console.log('Ejemplo de variante:', variantesCompletas[0]);
+    console.log('Importe final:', importeConDescuento);
   }
 
   try {
@@ -204,12 +220,12 @@ export const createVenta = async (appointment: Appointment, metodoPago: string):
     });
 
     if ((import.meta as any).env?.DEV) {
-   
+      console.log('Respuesta de venta exitosa:', response.status);
     }
 
     if (!response.ok) {
       if ((import.meta as any).env?.DEV) {
-        
+        console.error('Error HTTP en venta:', response.status, response.statusText);
       }
       throw new Error(`HTTP ${response.status}: Error en la venta`);
     }
@@ -217,7 +233,7 @@ export const createVenta = async (appointment: Appointment, metodoPago: string):
     const responseData = await response.json();
 
     if ((import.meta as any).env?.DEV) {
-      
+      console.log('Venta registrada exitosamente:', responseData);
     }
     return responseData;
   } catch (error: any) {

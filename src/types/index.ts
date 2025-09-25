@@ -3,6 +3,7 @@ export interface User {
   name: string;
   email: string;
   role: string;
+  empresa?: string;
 }
 
 export interface Usuario {
@@ -50,6 +51,15 @@ export interface Variante {
   _id: string;
   nombre: string;
   precio?: number; // Precio adicional en centavos (opcional)
+  // Campos adicionales para facturación (opcional para retrocompatibilidad)
+  empresa?: string;
+  descripcion?: string;
+  tiempo?: number;
+  valor?: number;
+  valorType?: string;
+  servicios?: string[];
+  productos?: any[];
+  deleted?: boolean;
 }
 
 export interface Recordatorios {
@@ -91,6 +101,8 @@ export interface Appointment {
   creacion: string;
   modificacion: string;
   venta?: string;
+  // Campo para caché de emergencia
+  _cached_at?: string;
 }
 
 export interface AuthState {
