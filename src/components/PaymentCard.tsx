@@ -269,7 +269,6 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
 
   // Verificar saldo del monedero
   const saldoMonedero = appointment.usuario.saldoMonedero || 0;
-  const tieneSaldoSuficiente = MonederoService.tieneSaldoSuficiente(saldoMonedero, importeTotal);
 
   const handlePaymentMethodClick = useCallback((methodId: string) => {
     if (!isDividedPayment) {
