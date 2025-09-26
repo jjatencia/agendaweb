@@ -74,8 +74,14 @@ export const createVenta = async (appointment: Appointment, metodoPago: string, 
         if (varianteCompleta) {
           // Devolver la variante tal como viene de la API (formato completo para facturación)
           // Asegurar que el valor esté en centavos como espera el sistema de facturación
+          // Añadir nombre del servicio al final como hace el admin para facturación
+          const nombreConServicio = appointment.servicios[0] ?
+            `${varianteCompleta.nombre} - ${appointment.servicios[0].nombre}` :
+            varianteCompleta.nombre;
+
           return {
             ...varianteCompleta,
+            nombre: nombreConServicio,
             valor: varianteCompleta.valor || (varianteAppointment.precio ? varianteAppointment.precio * 100 : 0),
             valorType: varianteCompleta.valorType || 'money'
           };
@@ -83,10 +89,15 @@ export const createVenta = async (appointment: Appointment, metodoPago: string, 
 
         // Si no se encuentra en la API, construir el objeto completo manualmente
         // Convertir precio a centavos para el valor (precio viene en euros)
+        // Añadir nombre del servicio al final como hace el admin para facturación
+        const nombreConServicio = appointment.servicios[0] ?
+          `${varianteAppointment.nombre} - ${appointment.servicios[0].nombre}` :
+          varianteAppointment.nombre;
+
         return {
           _id: varianteAppointment._id,
           empresa: appointment.empresa,
-          nombre: varianteAppointment.nombre,
+          nombre: nombreConServicio,
           descripcion: varianteAppointment.descripcion || '',
           tiempo: varianteAppointment.tiempo || 0,
           valor: (varianteAppointment.precio || 0) * 100, // Convertir a centavos
@@ -100,18 +111,25 @@ export const createVenta = async (appointment: Appointment, metodoPago: string, 
       console.warn('Error obteniendo variantes completas, usando las del appointment:', error);
       // En caso de error, construir las variantes con el formato completo requerido
       // Convertir precio a centavos para el valor
-      variantesCompletas = appointment.variantes.map(variante => ({
-        _id: variante._id,
-        empresa: appointment.empresa,
-        nombre: variante.nombre,
-        descripcion: variante.descripcion || '',
-        tiempo: variante.tiempo || 0,
-        valor: (variante.precio || 0) * 100, // Convertir a centavos
-        valorType: 'money',
-        servicios: variante.servicios || [],
-        productos: variante.productos || [],
-        deleted: variante.deleted || false
-      }));
+      variantesCompletas = appointment.variantes.map(variante => {
+        // Añadir nombre del servicio al final como hace el admin para facturación
+        const nombreConServicio = appointment.servicios[0] ?
+          `${variante.nombre} - ${appointment.servicios[0].nombre}` :
+          variante.nombre;
+
+        return {
+          _id: variante._id,
+          empresa: appointment.empresa,
+          nombre: nombreConServicio,
+          descripcion: variante.descripcion || '',
+          tiempo: variante.tiempo || 0,
+          valor: (variante.precio || 0) * 100, // Convertir a centavos
+          valorType: 'money',
+          servicios: variante.servicios || [],
+          productos: variante.productos || [],
+          deleted: variante.deleted || false
+        };
+      });
     }
   }
 
