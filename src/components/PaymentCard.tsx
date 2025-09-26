@@ -199,9 +199,10 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
     if (!isEditing) return;
 
     const calcularNuevoPrecio = () => {
-      let precioBase = (servicioSeleccionado?.precio || 0) / 100; // Convertir centavos a euros
+      // Los precios ya vienen en centavos, convertir a euros para mostrar
+      let precioBase = (servicioSeleccionado?.precio || 0) / 100;
 
-      // Añadir precio de variantes seleccionadas
+      // Añadir precio de variantes seleccionadas (también vienen en centavos)
       const precioVariantes = variantesSeleccionadas.reduce((sum, variante) => {
         return sum + ((variante.precio || 0) / 100);
       }, 0);
@@ -222,6 +223,18 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
       }
 
       const precioFinal = Math.max(0, precioBase - descuentoAcumulado);
+
+      // Debug para entender el cálculo
+      if ((import.meta as any).env?.DEV) {
+        console.log('=== CÁLCULO DE PRECIO ===');
+        console.log('Servicio seleccionado:', servicioSeleccionado?.nombre, servicioSeleccionado?.precio);
+        console.log('Precio base (euros):', precioBase);
+        console.log('Variantes seleccionadas:', variantesSeleccionadas.map(v => ({ nombre: v.nombre, precio: v.precio })));
+        console.log('Precio variantes (euros):', precioVariantes);
+        console.log('Descuento acumulado:', descuentoAcumulado);
+        console.log('Precio final calculado:', precioFinal);
+      }
+
       setPrecioCalculado(precioFinal);
       setDescuentoTotal(descuentoAcumulado);
     };
@@ -594,10 +607,21 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
               {/* Botón para confirmar cambios */}
               <button
                 onClick={() => {
+                  // Debug para confirmar la actualización
+                  if ((import.meta as any).env?.DEV) {
+                    console.log('=== CONFIRMAR CAMBIOS ===');
+                    console.log('Precio calculado:', precioCalculado);
+                    console.log('Precio anterior con descuento:', precioConDescuento);
+                  }
+
                   setIsEditing(false);
                   // precioCalculado ya incluye los descuentos y variantes calculados en tiempo real
                   setPrecioConDescuento(precioCalculado);
                   // descuentoTotal ya está calculado correctamente por el useEffect de cálculo
+
+                  if ((import.meta as any).env?.DEV) {
+                    console.log('Precio actualizado a:', precioCalculado);
+                  }
                 }}
                 className="w-full py-2 rounded-md text-sm font-medium transition-colors"
                 style={{
