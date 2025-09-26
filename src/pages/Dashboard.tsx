@@ -5,6 +5,7 @@ import DateSelector from '../components/DateSelector';
 import ViewModeSelector from '../components/ViewModeSelector';
 import BottomNavigation from '../components/BottomNavigation';
 import LoadingSpinner from '../components/LoadingSpinner';
+import VersionInfo from '../components/VersionInfo';
 import { LogoutIcon } from '../components/icons';
 import { useDashboard } from '../hooks/useDashboard';
 import { ViewMode } from '../types';
@@ -136,6 +137,8 @@ const Dashboard: React.FC = () => {
         </div>
       )}
 
+      {/* Version info */}
+      <VersionInfo />
     </div>
   );
 };
