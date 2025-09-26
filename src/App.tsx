@@ -4,6 +4,7 @@ import { Toaster } from 'react-hot-toast';
 import { useAuthStore } from './stores/authStore';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
+import UpdateNotification from './components/UpdateNotification';
 
 const App: React.FC = () => {
   const { checkAuth, isAuthenticated } = useAuthStore();
@@ -30,6 +31,9 @@ const App: React.FC = () => {
           />
         </Routes>
         
+        {/* Update notification */}
+        <UpdateNotification />
+
         {/* Toast notifications */}
         <Toaster
           position="top-center"
