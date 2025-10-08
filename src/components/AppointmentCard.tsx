@@ -195,7 +195,29 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
       }}
       onClick={isDisabled ? undefined : onClick}
     >
-      <div className="p-4 h-full flex flex-col gap-3 overflow-hidden">
+      <div className="p-4 h-full flex flex-col gap-3 overflow-hidden relative">
+        {/* Indicador de profesional aleatorio */}
+        {appointment.isProfesionalRandom && (
+          <div className="absolute top-4 right-4 z-10" title="Profesional aleatorio">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke={isDisabled ? '#9ca3af' : 'var(--exora-primary)'}
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="drop-shadow-sm"
+            >
+              <path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.7-1.1 2-1.7 3.3-1.7H22"></path>
+              <path d="M2 6h1.9c1.5 0 2.9.9 3.6 2.2l6.2 11.2c.6 1.3 2 2.2 3.6 2.2H22"></path>
+              <polyline points="18 2 22 6 18 10"></polyline>
+              <polyline points="18 14 22 18 18 22"></polyline>
+            </svg>
+          </div>
+        )}
+
         {/* Top section - Status and Name */}
         <div className="flex-shrink-0 space-y-2">
           {appointment.pagada ? (
