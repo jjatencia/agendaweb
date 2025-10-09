@@ -39,9 +39,9 @@ const WhatsAppModal: React.FC<WhatsAppModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-2xl">
+        <div className="flex-shrink-0 border-b border-gray-200 px-6 py-4 rounded-t-2xl">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold text-gray-900">Enviar mensaje de WhatsApp</h2>
             <button
@@ -66,8 +66,8 @@ const WhatsAppModal: React.FC<WhatsAppModalProps> = ({
           </p>
         </div>
 
-        {/* Body */}
-        <div className="px-6 py-4 space-y-4">
+        {/* Body - Scrollable */}
+        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
           {/* Selector de idioma */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -154,7 +154,7 @@ const WhatsAppModal: React.FC<WhatsAppModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-6 py-4 rounded-b-2xl flex gap-3">
+        <div className="flex-shrink-0 bg-gray-50 border-t border-gray-200 px-6 py-4 rounded-b-2xl flex gap-3">
           <button
             onClick={onClose}
             className="flex-1 px-4 py-2.5 border-2 border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-100 transition-colors"
