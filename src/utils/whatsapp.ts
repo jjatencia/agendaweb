@@ -67,9 +67,9 @@ export const messageTemplates: MessageTemplate[] = [
     },
     template: {
       es: (clientName: string, time?: string, professionalName?: string) =>
-        `Hola ${clientName}, soy ${professionalName || '[Tu nombre]'} de LBJ. Tenías cita${time ? ` a las ${time}` : ''} y no te hemos visto por aquí. ¿Va todo bien? ¿Sigues viniendo o prefieres que la reprogramemos?`,
+        `Hola ${clientName}, soy ${professionalName || '[Tu nombre]'} de LBJ. Tenías cita${time ? ` a las ${time}` : ''} y no te veo por aquí. ¿Estás de camino? ¿Cuánto tardarás en llegar?`,
       ca: (clientName: string, time?: string, professionalName?: string) =>
-        `Hola ${clientName}, sóc ${professionalName || '[El teu nom]'} de LBJ. Tenies cita${time ? ` a les ${time}` : ''} i no t'hem vist per aquí. Va tot bé? Continues venint o prefereixes que la reprogramem?`
+        `Hola ${clientName}, sóc ${professionalName || '[El teu nom]'} de LBJ. Tenies cita${time ? ` a les ${time}` : ''} i no et veig per aquí. Estàs de camí? Quant trigaràs a arribar?`
     }
   }
 ];
