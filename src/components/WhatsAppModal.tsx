@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { messageTemplates, generateWhatsAppLink } from '../utils/whatsapp';
+import { messageTemplates, generateWhatsAppLink, Language } from '../utils/whatsapp';
 
 interface WhatsAppModalProps {
   isOpen: boolean;
@@ -16,17 +16,18 @@ const WhatsAppModal: React.FC<WhatsAppModalProps> = ({
   professionalName,
   onClose
 }) => {
+  const [selectedLanguage, setSelectedLanguage] = useState<Language>('es');
   const [selectedTemplate, setSelectedTemplate] = useState(messageTemplates[0].id);
   const [customMessage, setCustomMessage] = useState('');
   const [additionalInfo, setAdditionalInfo] = useState('');
 
-  // Actualizar mensaje cuando cambia la plantilla o información adicional
+  // Actualizar mensaje cuando cambia la plantilla, idioma o información adicional
   useEffect(() => {
     const template = messageTemplates.find(t => t.id === selectedTemplate);
     if (template) {
-      setCustomMessage(template.template(clientName, additionalInfo || undefined, professionalName));
+      setCustomMessage(template.template[selectedLanguage](clientName, additionalInfo || undefined, professionalName));
     }
-  }, [selectedTemplate, clientName, additionalInfo, professionalName]);
+  }, [selectedTemplate, selectedLanguage, clientName, additionalInfo, professionalName]);
 
   const handleSend = () => {
     const link = generateWhatsAppLink(phone, customMessage);
@@ -67,6 +68,35 @@ const WhatsAppModal: React.FC<WhatsAppModalProps> = ({
 
         {/* Body */}
         <div className="px-6 py-4 space-y-4">
+          {/* Selector de idioma */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Idioma del mensaje
+            </label>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setSelectedLanguage('es')}
+                className={`flex-1 px-4 py-2 rounded-lg border-2 font-medium transition-all ${
+                  selectedLanguage === 'es'
+                    ? 'border-green-500 bg-green-50 text-green-700'
+                    : 'border-gray-200 hover:border-gray-300 bg-white text-gray-700'
+                }`}
+              >
+                🇪🇸 Español
+              </button>
+              <button
+                onClick={() => setSelectedLanguage('ca')}
+                className={`flex-1 px-4 py-2 rounded-lg border-2 font-medium transition-all ${
+                  selectedLanguage === 'ca'
+                    ? 'border-green-500 bg-green-50 text-green-700'
+                    : 'border-gray-200 hover:border-gray-300 bg-white text-gray-700'
+                }`}
+              >
+                🏴 Català
+              </button>
+            </div>
+          </div>
+
           {/* Selector de plantilla */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -83,7 +113,7 @@ const WhatsAppModal: React.FC<WhatsAppModalProps> = ({
                       : 'border-gray-200 hover:border-gray-300 bg-white'
                   }`}
                 >
-                  <span className="font-medium text-gray-900">{template.name}</span>
+                  <span className="font-medium text-gray-900">{template.name[selectedLanguage]}</span>
                 </button>
               ))}
             </div>

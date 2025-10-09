@@ -2,33 +2,62 @@
  * Utilidad para gestionar mensajes de WhatsApp
  */
 
+export type Language = 'es' | 'ca';
+
 export interface MessageTemplate {
   id: string;
-  name: string;
-  template: (clientName: string, time?: string, professionalName?: string) => string;
+  name: {
+    es: string;
+    ca: string;
+  };
+  template: {
+    es: (clientName: string, time?: string, professionalName?: string) => string;
+    ca: (clientName: string, time?: string, professionalName?: string) => string;
+  };
 }
 
 /**
- * Plantillas de mensajes predefinidas
+ * Plantillas de mensajes predefinidas en español y catalán
  */
 export const messageTemplates: MessageTemplate[] = [
   {
     id: 'cancelacion',
-    name: 'Cliente anterior canceló',
-    template: (clientName: string, time?: string, professionalName?: string) =>
-      `Hola ${clientName}, soy ${professionalName || '[Tu nombre]'} de LBJ. El cliente que tenía cita antes que tú ha cancelado su visita. Si te viene bien, puedes venir antes${time ? ` (${time})` : ''} y te atiendo sin problema. ¿Te vendría bien?`
+    name: {
+      es: 'Cliente anterior canceló',
+      ca: 'Client anterior ha cancel·lat'
+    },
+    template: {
+      es: (clientName: string, time?: string, professionalName?: string) =>
+        `Hola ${clientName}, soy ${professionalName || '[Tu nombre]'} de LBJ. El cliente que tenía cita antes que tú ha cancelado su visita. Si te viene bien, puedes venir antes${time ? ` (${time})` : ''} y te atiendo sin problema. ¿Te vendría bien?`,
+      ca: (clientName: string, time?: string, professionalName?: string) =>
+        `Hola ${clientName}, sóc ${professionalName || '[El teu nom]'} de LBJ. El client que tenia cita abans que tu ha cancel·lat la seva visita. Si et va bé, pots venir abans${time ? ` (${time})` : ''} i t'atenc sense problema. Et vindria bé?`
+    }
   },
   {
     id: 'retraso',
-    name: 'Vamos con retraso',
-    template: (clientName: string, time?: string, professionalName?: string) =>
-      `Hola ${clientName}, soy ${professionalName || '[Tu nombre]'} de LBJ. Lamento informarte que voy con un poco de retraso${time ? ` (aproximadamente ${time})` : ''}. Disculpa las molestias y gracias por tu comprensión.`
+    name: {
+      es: 'Vamos con retraso',
+      ca: 'Anem amb retard'
+    },
+    template: {
+      es: (clientName: string, time?: string, professionalName?: string) =>
+        `Hola ${clientName}, soy ${professionalName || '[Tu nombre]'} de LBJ. Lamento informarte que voy con un poco de retraso${time ? ` (aproximadamente ${time})` : ''}. Disculpa las molestias y gracias por tu comprensión.`,
+      ca: (clientName: string, time?: string, professionalName?: string) =>
+        `Hola ${clientName}, sóc ${professionalName || '[El teu nom]'} de LBJ. Lamento informar-te que vaig amb una mica de retard${time ? ` (aproximadament ${time})` : ''}. Disculpa les molèsties i gràcies per la teva comprensió.`
+    }
   },
   {
     id: 'disponibilidad',
-    name: 'Profesional disponible antes',
-    template: (clientName: string, time?: string, professionalName?: string) =>
-      `Hola ${clientName}, soy ${professionalName || '[Tu nombre]'} de LBJ. Tengo disponibilidad antes de tu cita${time ? ` (${time})` : ''}. Si quieres, puedo adelantarte la cita. ¿Te interesa?`
+    name: {
+      es: 'Profesional disponible antes',
+      ca: 'Professional disponible abans'
+    },
+    template: {
+      es: (clientName: string, time?: string, professionalName?: string) =>
+        `Hola ${clientName}, soy ${professionalName || '[Tu nombre]'} de LBJ. Tengo disponibilidad antes de tu cita${time ? ` (${time})` : ''}. Si quieres, puedo adelantarte la cita. ¿Te interesa?`,
+      ca: (clientName: string, time?: string, professionalName?: string) =>
+        `Hola ${clientName}, sóc ${professionalName || '[El teu nom]'} de LBJ. Tinc disponibilitat abans de la teva cita${time ? ` (${time})` : ''}. Si vols, puc avançar-te la cita. T'interessa?`
+    }
   }
 ];
 
