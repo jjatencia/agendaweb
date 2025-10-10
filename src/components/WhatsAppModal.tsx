@@ -38,7 +38,7 @@ const WhatsAppModal: React.FC<WhatsAppModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black bg-opacity-50">
       <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="flex-shrink-0 border-b border-gray-200 px-6 py-4 rounded-t-2xl">
@@ -67,7 +67,7 @@ const WhatsAppModal: React.FC<WhatsAppModalProps> = ({
         </div>
 
         {/* Body - Scrollable */}
-        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+        <div className="flex-1 min-h-0 overflow-y-auto px-6 py-4 space-y-4">
           {/* Selector de idioma */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
