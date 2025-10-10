@@ -38,10 +38,10 @@ const WhatsAppModal: React.FC<WhatsAppModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black bg-opacity-50">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 bg-black bg-opacity-50">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[95vh] flex flex-col">
         {/* Header */}
-        <div className="flex-shrink-0 border-b border-gray-200 px-6 py-4 rounded-t-2xl">
+        <div className="flex-shrink-0 border-b border-gray-200 px-4 py-3 rounded-t-2xl">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold text-gray-900">Enviar mensaje de WhatsApp</h2>
             <button
@@ -67,7 +67,7 @@ const WhatsAppModal: React.FC<WhatsAppModalProps> = ({
         </div>
 
         {/* Body - Scrollable */}
-        <div className="flex-1 min-h-0 overflow-y-auto px-6 py-4 space-y-4">
+        <div className="flex-1 min-h-0 overflow-y-auto px-4 py-3 space-y-3">
           {/* Selector de idioma */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -99,15 +99,15 @@ const WhatsAppModal: React.FC<WhatsAppModalProps> = ({
 
           {/* Selector de plantilla */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
               Selecciona una plantilla
             </label>
-            <div className="grid grid-cols-1 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               {messageTemplates.map(template => (
                 <button
                   key={template.id}
                   onClick={() => setSelectedTemplate(template.id)}
-                  className={`text-left px-4 py-3 rounded-lg border-2 transition-all ${
+                  className={`text-left px-3 py-2 rounded-lg border-2 transition-all text-sm ${
                     selectedTemplate === template.id
                       ? 'border-green-500 bg-green-50'
                       : 'border-gray-200 hover:border-gray-300 bg-white'
@@ -138,14 +138,15 @@ const WhatsAppModal: React.FC<WhatsAppModalProps> = ({
 
           {/* Mensaje editable */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
               Mensaje (puedes editarlo)
             </label>
             <textarea
               value={customMessage}
               onChange={e => setCustomMessage(e.target.value)}
-              rows={6}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
+              rows={8}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-y text-sm"
+              style={{ minHeight: '120px', maxHeight: '240px' }}
             />
             <p className="text-xs text-gray-500 mt-1">
               Caracteres: {customMessage.length}
@@ -154,7 +155,7 @@ const WhatsAppModal: React.FC<WhatsAppModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="flex-shrink-0 bg-gray-50 border-t border-gray-200 px-6 py-4 rounded-b-2xl flex gap-3">
+        <div className="flex-shrink-0 bg-gray-50 border-t border-gray-200 px-4 py-3 rounded-b-2xl flex gap-2">
           <button
             onClick={onClose}
             className="flex-1 px-4 py-2.5 border-2 border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-100 transition-colors"
