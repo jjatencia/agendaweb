@@ -38,7 +38,7 @@ const WhatsAppModal: React.FC<WhatsAppModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 bg-black bg-opacity-50">
+    <div className="fixed inset-0 z-[11000] flex items-center justify-center p-3 bg-black bg-opacity-50">
       <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[95vh] flex flex-col">
         {/* Header */}
         <div className="flex-shrink-0 border-b border-gray-200 px-4 py-3 rounded-t-2xl">
