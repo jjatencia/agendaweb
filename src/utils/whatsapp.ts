@@ -120,7 +120,8 @@ export const generateWhatsAppLink = (phone: string, message: string, useShortcut
     // Usar Atajo de iOS para auto-envío
     // El usuario debe tener instalado un Atajo llamado "EnviarWhatsAppLBJ"
     // que reciba "phone" y "message" como parámetros
-    return `shortcuts://run-shortcut?name=EnviarWhatsAppLBJ&input=text&text=${formattedPhone}|${encodedMessage}`;
+    // Usar "|||" como separador (más visible y menos propenso a errores)
+    return `shortcuts://run-shortcut?name=EnviarWhatsAppLBJ&input=text&text=${formattedPhone}|||${encodedMessage}`;
   }
 
   // Fallback: usar wa.me que funciona en web y mobile
