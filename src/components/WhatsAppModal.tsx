@@ -31,8 +31,8 @@ const WhatsAppModal: React.FC<WhatsAppModalProps> = ({
   }, [selectedTemplate, selectedLanguage, clientName, additionalInfo, professionalName]);
 
   const handleSend = () => {
-    const link = generateWhatsAppLink(phone, customMessage, true); // true = intentar auto-envío
-    window.location.href = link; // Usar location.href en lugar de window.open para mejor compatibilidad con esquemas de URL
+    const link = generateWhatsAppLink(phone, customMessage);
+    window.open(link, '_blank');
     onClose();
   };
 
