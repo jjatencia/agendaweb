@@ -106,25 +106,13 @@ export const formatPhoneForWhatsApp = (phone: string): string => {
  * Genera un deep link de WhatsApp con mensaje pre-rellenado
  * @param phone - Número de teléfono
  * @param message - Mensaje pre-rellenado
- * @param useShortcut - Usar Atajo de iOS para auto-envío (solo iOS)
- * @returns URL de WhatsApp o del Atajo
+ * @returns URL de WhatsApp
  */
-export const generateWhatsAppLink = (phone: string, message: string, useShortcut: boolean = false): string => {
+export const generateWhatsAppLink = (phone: string, message: string): string => {
   const formattedPhone = formatPhoneForWhatsApp(phone);
   const encodedMessage = encodeURIComponent(message);
 
-  // Detectar si es iOS
-  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-
-  if (useShortcut && isIOS) {
-    // Usar Atajo de iOS para auto-envío
-    // El usuario debe tener instalado un Atajo llamado "EnviarWhatsAppLBJ"
-    // que reciba "phone" y "message" como parámetros
-    // Usar "|||" como separador (más visible y menos propenso a errores)
-    return `shortcuts://run-shortcut?name=EnviarWhatsAppLBJ&input=text&text=${formattedPhone}|||${encodedMessage}`;
-  }
-
-  // Fallback: usar wa.me que funciona en web y mobile
+  // Usar wa.me que funciona en web y mobile
   return `https://wa.me/${formattedPhone}?text=${encodedMessage}`;
 };
 
