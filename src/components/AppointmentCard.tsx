@@ -158,13 +158,7 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
     setShowConfirmModal(false);
   };
 
-  const cardSizeStyle = {
-    width: 'min(100%, 560px)',
-    maxWidth: '560px',
-    height: '100%',
-    maxHeight: 'min(680px, calc(100vh - 160px))',
-    minHeight: 'min(420px, calc(100vh - 160px))'
-  } as const;
+  const cardSizeClass = 'appointment-card-size';
 
   const infoTileClass = `${
     isDisabled ? 'bg-gray-100 text-gray-400' : 'bg-gray-50 text-gray-700'
@@ -180,6 +174,7 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
 
   return (
     <animated.div
+      className={cardSizeClass}
       style={{
         ...style,
         backgroundColor: isDisabled ? '#f8f9fa' : 'white',
@@ -189,7 +184,7 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
           : '0 22px 45px rgba(85, 91, 246, 0.15)',
         cursor: isDisabled ? 'default' : 'pointer',
         zIndex: isActive ? 20 : 10,
-        ...cardSizeStyle,
+        height: '100%',
         margin: '0 auto',
         position: 'relative',
         opacity: isDisabled ? 0.6 : 1,
@@ -197,6 +192,22 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
       }}
       onClick={isDisabled ? undefined : onClick}
     >
+      <style>{`
+        .appointment-card-size {
+          width: min(100%, 560px);
+          max-width: 560px;
+          max-height: min(680px, calc(100vh - 160px));
+          min-height: min(420px, calc(100vh - 160px));
+        }
+        @media (min-width: 768px) {
+          .appointment-card-size {
+            width: min(100%, 640px);
+            max-width: 640px;
+            max-height: min(900px, calc(100vh - 100px));
+            min-height: min(520px, calc(100vh - 100px));
+          }
+        }
+      `}</style>
       <div className="p-4 h-full flex flex-col gap-3 overflow-hidden relative">
         {/* Indicador de profesional aleatorio */}
         {appointment.isProfesionalRandom && (
