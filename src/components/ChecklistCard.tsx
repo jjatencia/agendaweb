@@ -139,31 +139,31 @@ const PasoItem: React.FC<{
   const subSubOps = def.subSubOpciones?.[paso.subValor || ''];
 
   return (
-    <div className="rounded-2xl bg-gray-50 px-3 py-3 space-y-2">
+    <div className="rounded-2xl bg-gray-50 px-3 py-3 md:px-4 md:py-4 space-y-2 md:space-y-3">
       {/* Check + label */}
       <button
         onClick={toggle}
         className="flex items-center gap-3 w-full text-left"
       >
         <div
-          className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-colors ${
+          className={`w-6 h-6 md:w-7 md:h-7 rounded-lg border-2 flex items-center justify-center transition-colors ${
             paso.checked
               ? 'bg-[var(--exora-primary)] border-[var(--exora-primary)]'
               : 'border-gray-300 bg-white'
           }`}
         >
           {paso.checked && (
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <svg className="w-3.5 h-3.5 md:w-4 md:h-4" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="20,6 9,17 4,12" />
             </svg>
           )}
         </div>
-        <span className={`text-sm font-semibold ${paso.checked ? 'text-gray-900' : 'text-gray-500'}`}>
+        <span className={`text-sm md:text-base font-semibold ${paso.checked ? 'text-gray-900' : 'text-gray-500'}`}>
           {def.label}
         </span>
         {/* Resumen inline de lo seleccionado */}
         {paso.checked && (paso.valor || (paso.valores && paso.valores.length > 0)) && (
-          <span className="text-xs text-gray-400 ml-auto">
+          <span className="text-xs md:text-sm text-gray-400 ml-auto">
             {def.multiSelect
               ? [(paso.valores || []).join(' + '), paso.subValor].filter(Boolean).join(' → ')
               : [paso.valor, paso.subValor, paso.subValor2].filter(Boolean).join(' → ')
@@ -174,12 +174,12 @@ const PasoItem: React.FC<{
 
       {/* Opciones nivel 1 */}
       {paso.checked && def.opciones && (
-        <div className="flex flex-wrap gap-2 ml-9">
+        <div className="flex flex-wrap gap-2 ml-9 md:ml-10">
           {def.opciones.map((op) => (
             <button
               key={op}
               onClick={() => setValor(op)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+              className={`px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs md:text-sm font-medium transition-colors ${
                 (def.multiSelect ? (paso.valores || []).includes(op) : paso.valor === op)
                   ? 'bg-[var(--exora-primary)] text-white'
                   : 'bg-white border border-gray-200 text-gray-600'
@@ -193,14 +193,14 @@ const PasoItem: React.FC<{
 
       {/* Sub-nivel para multiSelect (ej: Texturizado / Peinado) */}
       {paso.checked && tieneSeleccionMulti && def.subNivel && (
-        <div className="ml-9 mt-1 rounded-xl bg-white border border-gray-200 px-3 py-2 space-y-1.5">
-          <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Acabado</span>
+        <div className="ml-9 md:ml-10 mt-1 rounded-xl bg-white border border-gray-200 px-3 py-2 md:px-4 md:py-3 space-y-1.5">
+          <span className="text-[11px] md:text-xs font-semibold text-gray-400 uppercase tracking-wider">Acabado</span>
           <div className="flex flex-wrap gap-2">
             {def.subNivel.map((op) => (
               <button
                 key={op}
                 onClick={() => setSubValor(op)}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                className={`px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs md:text-sm font-medium transition-colors ${
                   paso.subValor === op
                     ? 'bg-[var(--exora-primary)] text-white'
                     : 'bg-gray-100 border border-gray-200 text-gray-600'
@@ -215,12 +215,12 @@ const PasoItem: React.FC<{
 
       {/* Opciones nivel 2 (sub) */}
       {paso.checked && subOps && (
-        <div className="flex flex-wrap gap-2 ml-9">
+        <div className="flex flex-wrap gap-2 ml-9 md:ml-10">
           {subOps.map((op) => (
             <button
               key={op}
               onClick={() => setSubValor(op)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+              className={`px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs md:text-sm font-medium transition-colors ${
                 paso.subValor === op
                   ? 'bg-[var(--exora-primary)] text-white'
                   : 'bg-white border border-gray-200 text-gray-600'
@@ -234,12 +234,12 @@ const PasoItem: React.FC<{
 
       {/* Opciones nivel 3 (sub-sub) */}
       {paso.checked && subSubOps && (
-        <div className="flex flex-wrap gap-2 ml-9">
+        <div className="flex flex-wrap gap-2 ml-9 md:ml-10">
           {subSubOps.map((op) => (
             <button
               key={op}
               onClick={() => setSubValor2(op)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+              className={`px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs md:text-sm font-medium transition-colors ${
                 paso.subValor2 === op
                   ? 'bg-[var(--exora-primary)] text-white'
                   : 'bg-white border border-gray-200 text-gray-600'
@@ -356,31 +356,40 @@ const ChecklistCard: React.FC<ChecklistCardProps> = ({ appointment, onClose }) =
 
   const todosChecked = PASOS_CHECKLIST.every((def) => pasos[def.id]?.checked);
 
-  const cardSizeStyle = {
-    width: 'min(100%, 560px)',
-    maxWidth: '560px',
-    height: '100%',
-    maxHeight: 'min(680px, calc(100vh - 160px))',
-    minHeight: 'min(420px, calc(100vh - 160px))',
-  } as const;
-
   return (
     <div
+      className="checklist-card-size"
       style={{
         backgroundColor: 'white',
         borderRadius: '24px',
         boxShadow: '0 22px 45px rgba(85, 91, 246, 0.15)',
-        ...cardSizeStyle,
+        height: '100%',
         margin: '0 auto',
         position: 'relative',
       }}
     >
-      <div className="p-4 h-full flex flex-col gap-3 overflow-hidden">
+      <style>{`
+        .checklist-card-size {
+          width: min(100%, 560px);
+          max-width: 560px;
+          max-height: min(680px, calc(100vh - 160px));
+          min-height: min(420px, calc(100vh - 160px));
+        }
+        @media (min-width: 768px) {
+          .checklist-card-size {
+            width: min(100%, 640px);
+            max-width: 640px;
+            max-height: min(900px, calc(100vh - 100px));
+            min-height: min(520px, calc(100vh - 100px));
+          }
+        }
+      `}</style>
+      <div className="p-4 md:p-6 h-full flex flex-col gap-3 md:gap-4 overflow-hidden">
         {/* Header */}
         <div className="flex-shrink-0 text-center space-y-1">
-          <h2 className="text-lg font-bold text-gray-900">{clienteNombre}</h2>
+          <h2 className="text-lg md:text-xl font-bold text-gray-900">{clienteNombre}</h2>
           {tieneDatosPrevios && (
-            <span className="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-medium">
+            <span className="text-xs md:text-sm bg-blue-50 text-blue-600 px-3 py-1 md:px-4 md:py-1.5 rounded-full font-medium">
               Datos del corte anterior cargados
             </span>
           )}
@@ -388,19 +397,19 @@ const ChecklistCard: React.FC<ChecklistCardProps> = ({ appointment, onClose }) =
 
         {/* Tipo de corte */}
         <div className="flex-shrink-0">
-          <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1 block">
+          <label className="text-xs md:text-sm font-semibold text-gray-500 uppercase tracking-wide mb-1 block">
             Tipo de corte
           </label>
           <div className="relative">
             <div
-              className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide snap-x snap-mandatory"
+              className="flex gap-2 overflow-x-auto md:overflow-x-visible md:flex-wrap pb-1 scrollbar-hide snap-x snap-mandatory md:snap-none"
               style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
               {TIPOS_CORTE.map((tipo) => (
                 <button
                   key={tipo}
                   onClick={() => handleTipoCorteChange(tipo)}
-                  className={`flex-shrink-0 snap-start px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                  className={`flex-shrink-0 md:flex-shrink snap-start md:snap-align-none px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs md:text-sm font-medium transition-colors ${
                     tipoCorte === tipo
                       ? 'bg-[var(--exora-primary)] text-white'
                       : 'bg-gray-100 text-gray-600 border border-gray-200'
@@ -410,14 +419,14 @@ const ChecklistCard: React.FC<ChecklistCardProps> = ({ appointment, onClose }) =
                 </button>
               ))}
             </div>
-            {/* Right fade hint */}
-            <div className="absolute right-0 top-0 bottom-1 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none" />
+            {/* Right fade hint - hidden on md+ where items wrap */}
+            <div className="absolute right-0 top-0 bottom-1 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none md:hidden" />
           </div>
         </div>
 
         {/* Pasos del checklist */}
-        <div className="flex-1 overflow-y-auto space-y-2 pr-1">
-          <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1 block">
+        <div className="flex-1 overflow-y-auto space-y-2 md:space-y-3 pr-1">
+          <label className="text-xs md:text-sm font-semibold text-gray-500 uppercase tracking-wide mb-1 block">
             Checklist
           </label>
           {PASOS_CHECKLIST.map((def) => (
@@ -430,8 +439,8 @@ const ChecklistCard: React.FC<ChecklistCardProps> = ({ appointment, onClose }) =
           ))}
 
           {/* Notas */}
-          <div className="rounded-2xl bg-gray-50 px-3 py-3">
-            <label className="text-xs font-semibold text-gray-500 block mb-1">Notas</label>
+          <div className="rounded-2xl bg-gray-50 px-3 py-3 md:px-4 md:py-4">
+            <label className="text-xs md:text-sm font-semibold text-gray-500 block mb-1">Notas</label>
             <textarea
               value={notas}
               onChange={(e) => {
@@ -439,17 +448,17 @@ const ChecklistCard: React.FC<ChecklistCardProps> = ({ appointment, onClose }) =
                 setGuardado(false);
               }}
               placeholder="Observaciones del corte..."
-              className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-700 resize-none focus:outline-none focus:ring-2 focus:ring-[var(--exora-primary)] focus:border-transparent"
+              className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 md:px-4 md:py-3 text-sm md:text-base text-gray-700 resize-none focus:outline-none focus:ring-2 focus:ring-[var(--exora-primary)] focus:border-transparent"
               rows={2}
             />
           </div>
         </div>
 
         {/* Footer: botón guardar + cerrar */}
-        <div className="flex-shrink-0 pt-2 space-y-2">
+        <div className="flex-shrink-0 pt-2 md:pt-3 space-y-2">
           <button
             onClick={handleGuardar}
-            className={`w-full py-3 rounded-xl font-semibold text-sm transition-all ${
+            className={`w-full py-3 md:py-3.5 rounded-xl font-semibold text-sm md:text-base transition-all ${
               guardado
                 ? 'bg-green-100 text-green-700 border-2 border-green-300'
                 : todosChecked
@@ -462,7 +471,7 @@ const ChecklistCard: React.FC<ChecklistCardProps> = ({ appointment, onClose }) =
           {onClose && (
             <button
               onClick={onClose}
-              className="w-full py-2 rounded-xl font-medium text-sm text-gray-500 hover:text-gray-700 transition-colors"
+              className="w-full py-2 md:py-3 rounded-xl font-medium text-sm md:text-base text-gray-500 hover:text-gray-700 transition-colors"
             >
               Cerrar
             </button>
