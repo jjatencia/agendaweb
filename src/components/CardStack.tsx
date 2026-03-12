@@ -39,8 +39,8 @@ const CARD_STYLES = {
 };
 
 const LAYER_STYLES = {
-  prev: { transform: 'translateY(16px) scale(0.94)', opacity: 0.6, zIndex: 1 },
-  next: { transform: 'translateY(8px) scale(0.97)', opacity: 0.8, zIndex: 2 },
+  prev: { transform: 'translateY(-12px) scale(0.92)', opacity: 0.4, zIndex: 1 },
+  next: { transform: 'translateY(-6px) scale(0.96)', opacity: 0.6, zIndex: 2 },
   current: { touchAction: 'none' as const, zIndex: 50 }
 };
 
@@ -110,8 +110,8 @@ const CardStack: React.FC<CardStackProps> = ({
       className="relative w-full flex items-center justify-center"
       style={CONTAINER_STYLE}
     >
-      {/* Background cards for 3D stack effect */}
-      {prevAppointment && (
+      {/* Background cards for 3D stack effect — hidden during checklist flip */}
+      {!checklistMode && prevAppointment && (
         <div
           key={`prev-${prevAppointment._id}`}
           className={CARD_STYLES.base}
@@ -125,7 +125,7 @@ const CardStack: React.FC<CardStackProps> = ({
         </div>
       )}
 
-      {nextAppointment && (
+      {!checklistMode && nextAppointment && (
         <div
           key={`next-${nextAppointment._id}`}
           className={CARD_STYLES.base}
