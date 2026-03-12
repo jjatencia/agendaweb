@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronLeftIcon, ChevronRightIcon } from './icons';
+import { ChevronLeftIcon, ChevronRightIcon, ChecklistIcon } from './icons';
 
 interface BottomNavigationProps {
   canGoBack: boolean;
@@ -54,12 +54,7 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({
           `}
           style={{ backgroundColor: 'var(--exora-light-yellow)' }}
         >
-          <span
-            className="text-2xl font-bold"
-            style={{ color: '#555BF6' }}
-          >
-            €
-          </span>
+          <ChecklistIcon size={26} style={{ color: '#555BF6' }} />
         </button>
 
         {/* Next Button */}

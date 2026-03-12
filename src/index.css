@@ -41,3 +41,8 @@ html, body {
         padding-bottom: env(safe-area-inset-bottom);
     }
 }
+
+/* Hide scrollbar for horizontal scroll containers */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}

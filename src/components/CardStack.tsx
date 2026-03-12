@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { animated, useSpring } from '@react-spring/web';
 import { Appointment } from '../types';
 import AppointmentCard from './AppointmentCard';
-import PaymentCard from './PaymentCard';
+import ChecklistCard from './ChecklistCard';
 import { useSwipeGestureSimple } from '../hooks/useSwipeGestureSimple';
 
 interface CardStackProps {
@@ -11,9 +11,8 @@ interface CardStackProps {
   onNext: () => void;
   onPrevious: () => void;
   onRefresh?: () => void;
-  paymentMode?: boolean;
-  onCompletePayment?: (appointmentId: string, metodoPago: string) => void;
-  onWalletPayment?: (appointmentId: string, editedAppointment?: Appointment) => void;
+  checklistMode?: boolean;
+  onCloseChecklist?: () => void;
   onMarkNoShow?: (appointmentId: string) => void;
 }
 
@@ -56,9 +55,8 @@ const CardStack: React.FC<CardStackProps> = ({
   onNext,
   onPrevious,
   onRefresh,
-  paymentMode = false,
-  onCompletePayment,
-  onWalletPayment,
+  checklistMode = false,
+  onCloseChecklist,
   onMarkNoShow
 }) => {
   const currentAppointment = useMemo(
@@ -77,15 +75,15 @@ const CardStack: React.FC<CardStackProps> = ({
   const swipeGesture = useSwipeGestureSimple({
     onSwipeLeft: onNext,
     onSwipeRight: onPrevious,
-    onSwipeDown: paymentMode ? undefined : onRefresh,
-    disabled: appointments.length <= 1 || paymentMode,
+    onSwipeDown: checklistMode ? undefined : onRefresh,
+    disabled: appointments.length <= 1 || checklistMode,
     isFirst: currentIndex === 0,
     isLast: currentIndex === appointments.length - 1
   });
 
-  // Animación flip para el cambio entre tarjeta normal y pago
+  // Animación flip para el cambio entre tarjeta normal y checklist
   const flipAnimation = useSpring({
-    transform: paymentMode ? 'rotateY(180deg)' : 'rotateY(0deg)',
+    transform: checklistMode ? 'rotateY(180deg)' : 'rotateY(0deg)',
     config: { tension: 200, friction: 25 }
   });
 
@@ -144,10 +142,10 @@ const CardStack: React.FC<CardStackProps> = ({
       {/* Current appointment card with swipe */}
       <animated.div
         key={`swipe-${currentIndex}-${currentAppointment._id}`}
-        {...swipeGesture.bind()}
+        {...(checklistMode ? {} : swipeGesture.bind())}
         className={CARD_STYLES.current}
         style={{
-          ...swipeGesture.style,
+          ...(checklistMode ? {} : swipeGesture.style),
           ...LAYER_STYLES.current,
           ...flipAnimation,
           transformStyle: 'preserve-3d'
@@ -170,7 +168,7 @@ const CardStack: React.FC<CardStackProps> = ({
           />
         </div>
 
-        {/* Lado trasero - Tarjeta de pago */}
+        {/* Lado trasero - Checklist */}
         <div
           style={{
             position: 'absolute',
@@ -180,10 +178,9 @@ const CardStack: React.FC<CardStackProps> = ({
             transform: 'rotateY(180deg)'
           }}
         >
-          <PaymentCard
+          <ChecklistCard
             appointment={currentAppointment}
-            onCompletePayment={onCompletePayment}
-            onWalletPayment={onWalletPayment}
+            onClose={onCloseChecklist}
           />
         </div>
       </animated.div>

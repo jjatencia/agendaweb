@@ -15,7 +15,7 @@ const Dashboard: React.FC = () => {
   const {
     userName,
     isAuthenticated,
-    paymentMode,
+    checklistMode,
     currentDate,
     currentIndex,
     viewMode,
@@ -105,9 +105,8 @@ const Dashboard: React.FC = () => {
                   onNext={handlers.nextAppointment}
                   onPrevious={handlers.previousAppointment}
                   onRefresh={handlers.refreshAppointments}
-                  paymentMode={paymentMode}
-                  onCompletePayment={handlers.completePayment}
-                  onWalletPayment={handlers.completeWalletPayment}
+                  checklistMode={checklistMode}
+                  onCloseChecklist={handlers.closeChecklist}
                   onMarkNoShow={handlers.markNoShow}
                 />
               </div>
@@ -129,9 +128,9 @@ const Dashboard: React.FC = () => {
           <BottomNavigation
             canGoBack={canGoBack}
             canGoForward={canGoForward}
-            onPrevious={paymentMode ? undefined : handlers.previousAppointment}
-            onNext={paymentMode ? undefined : handlers.nextAppointment}
-            onAdd={handlers.initiatePaymentMode}
+            onPrevious={checklistMode ? undefined : handlers.previousAppointment}
+            onNext={checklistMode ? undefined : handlers.nextAppointment}
+            onAdd={handlers.toggleChecklist}
             disabled={navigationDisabled}
           />
         </div>
